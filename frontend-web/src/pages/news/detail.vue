@@ -23,27 +23,29 @@
         </div>
 
         <!-- AI 摘要 -->
-        <div v-if="detail.aiAnalysis || detail.summary" class="ai-section">
+        <div v-if="aiSection.summary" class="ai-section">
           <h3 class="section-title">🤖 {{ $t('news.summary') }}</h3>
-          <p>{{ detail.aiAnalysis?.summary || detail.summary }}</p>
+          <p>{{ aiSection.summary }}</p>
         </div>
 
         <!-- 核心事实 -->
-        <div v-if="detail.summary" class="content-section">
+        <div v-if="aiSection.facts?.length" class="content-section">
           <h3 class="section-title">📋 {{ $t('news.facts') }}</h3>
-          <p>{{ detail.summary }}</p>
+          <ul class="facts-list">
+            <li v-for="(f, i) in aiSection.facts" :key="i">{{ f }}</li>
+          </ul>
         </div>
 
         <!-- 事件背景 -->
-        <div v-if="detail.aiAnalysis?.background" class="content-section">
+        <div v-if="aiSection.background" class="content-section">
           <h3 class="section-title">📖 {{ $t('news.background') }}</h3>
-          <p>{{ detail.aiAnalysis.background }}</p>
+          <p>{{ aiSection.background }}</p>
         </div>
 
         <!-- 影响分析 -->
-        <div v-if="detail.aiAnalysis?.impact" class="content-section">
+        <div v-if="aiSection.impact" class="content-section">
           <h3 class="section-title">📊 {{ $t('news.impact') }}</h3>
-          <p>{{ detail.aiAnalysis.impact }}</p>
+          <p>{{ aiSection.impact }}</p>
         </div>
 
         <!-- 标签 -->
@@ -70,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { ElMessage } from 'element-plus';
@@ -91,6 +93,30 @@ const detail = ref<NewsDetail | null>(null);
 const related = ref<NewsItemType[]>([]);
 const loading = ref(false);
 const isFav = ref(false);
+
+/** 当前语言 key (zh / en)，用于从 aiResult 取对应语言内容 */
+const lang = computed(() => locale.value === 'en-US' ? 'en' : 'zh');
+
+/** 根据当前语言从 aiResult 取 AI 分析内容 */
+const aiSection = computed(() => {
+  const ai = detail.value?.aiResult;
+  const localized = ai?.[lang.value] as Record<string, any> | undefined;
+  if (localized) {
+    return {
+      summary: (localized.summary as string) || detail.value?.aiAnalysis?.summary || detail.value?.summary || '',
+      facts: (localized.facts as string[]) || [],
+      background: (localized.background as string) || detail.value?.aiAnalysis?.background || '',
+      impact: (localized.impact as string) || detail.value?.aiAnalysis?.impact || '',
+    };
+  }
+  // 回退到旧 aiAnalysis 或 summary 字段
+  return {
+    summary: detail.value?.aiAnalysis?.summary || detail.value?.summary || '',
+    facts: [] as string[],
+    background: detail.value?.aiAnalysis?.background || '',
+    impact: detail.value?.aiAnalysis?.impact || '',
+  };
+});
 
 function formatDate(d?: string) {
   if (!d) return '';
@@ -149,6 +175,7 @@ onMounted(async () => {
 .section-title { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: var(--text-primary); }
 .related-section { margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 24px; }
 .mr-2 { margin-right: 8px; }
+.facts-list { padding-left: 20px; line-height: 1.8; color: var(--text-secondary); }
 
 @media (max-width: 768px) {
   .detail-page { max-width: 100%; }

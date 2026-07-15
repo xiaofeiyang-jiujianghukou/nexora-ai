@@ -41,23 +41,33 @@ export interface NewsItem {
   id: number;
   title: string;
   summary?: string;
-  summaryEn?: string;
   sourceName?: string;
   categoryName?: string;
   hotScore?: number;
   viewCount?: number;
   tags?: string[];
   publishTime?: string;
+  /** 多语言 AI 分析结果: { zh: {summary, facts, background, impact}, en: {...}, ... } */
+  aiResult?: Record<string, any>;
 }
 
 const props = defineProps<{ item: NewsItem }>();
 const router = useRouter();
 const { t, locale } = useI18n();
-const summaryText = computed(() =>
-  locale.value === 'en-US' && props.item.summaryEn
-    ? props.item.summaryEn
-    : props.item.summary
-);
+
+/** 根据当前语言从 aiResult 取摘要，回退到 summary 字段 */
+const lang = computed(() => locale.value === 'en-US' ? 'en' : 'zh');
+const summaryText = computed(() => {
+  const ai = props.item.aiResult;
+  if (ai) {
+    const localized = ai[lang.value] as Record<string, any> | undefined;
+    if (localized?.summary) return localized.summary as string;
+    // fallback to zh if current lang section missing
+    const zh = ai['zh'] as Record<string, any> | undefined;
+    if (zh?.summary) return zh.summary as string;
+  }
+  return props.item.summary || '';
+});
 
 function goDetail() {
   router.push(`/news/${props.item.id}`);

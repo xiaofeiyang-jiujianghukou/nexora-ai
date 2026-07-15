@@ -1,68 +1,58 @@
 ---
 name: session-handoff
-description: 下个会话起点 — 中英文内容切换完善
+description: 下个会话起点 — P1/P2 全部完成，中英文内容切换已修复
 metadata:
   type: project
 ---
 
 # Session Handoff — 下个会话起点
 
-**日期**: 2026-07-15 (end of session)
+**日期**: 2026-07-16 (end of session)
 **分支**: master
-**状态**: P1 完成, P2 部分完成, 中英文切换有遗留
+**状态**: P1 ✅, P2 ✅, 中英文内容切换 ✅
 
-## 当前问题
+## 本次会话完成的工作
 
-**中英文切换不完整**：导航标签等 UI 文字能切换，但新闻卡片和详情页的摘要始终显示中文。
-用户切换 EN 后，期望看到英文摘要。
+**中英文内容切换修复**（2026-07-16）：
 
-## 根因
+### 后端 (4 files)
+- `NewsSummaryVO` — 新增 `aiResult` (Map) 字段
+- `NewsDetailVO` — 新增 `aiResult` (Map) 字段
+- `NewsServiceImpl.toSummary()` / `toDetail()` — 解析 `ai_result` JSON 并设置到 VO
+- `SearchServiceImpl.search()` — 同上
 
-AI 已产出双语摘要存入 `ai_result` JSON 列：
-```json
-{"zh":{"summary":"中文摘要..."}, "en":{"summary":"English summary..."}, "category":"...", ...}
-```
+### 前端 (3 files)
+- `NewsCard.vue` — `summaryText` 改为从 `aiResult[lang].summary` 取，删除无效的 `summaryEn`
+- `news/detail.vue` — 所有 AI 内容区域 (摘要/事实/背景/影响) 根据 locale 从 `aiResult` 取对应语言
+- `newsStore.ts` — `NewsDetail` 接口新增 `aiResult` 字段
 
-但前端没有读取和切换这个字段：
-- NewsCard: `summaryText` 检查 `item.summaryEn`（已不存在的列）
-- NewsDetail: 没有从 `ai_result` 取对应语言
-- 后端 API 返回的 VO 没有包含 `aiResult` 字段
+### 基础设施
+- `test-schema.sql` — H2 测试表添加 `ai_result` 列
 
-## 需要做的事
+### 验证
+- 后端编译 ✅
+- 前端 type-check ✅
+- 17 个 API 测试全部通过 ✅
+- 前端 vite build ✅
 
-1. **后端** — 修改新闻列表/详情 API，返回 `ai_result` 中当前语言对应的 summary
-   - 方案A: API 返回 `aiResult` JSON，前端解析
-   - 方案B: 后端根据 `Accept-Language` header 返回对应语言内容
-2. **前端** — NewsCard + NewsDetail 根据 `locale` 从 `ai_result` 取对应语言摘要
-3. **验证** — 切换 EN 后新闻卡片和详情页显示英文摘要
+## 已完成总结
 
-## P1 已完成（已验证）
+| 模块 | 状态 |
+|------|------|
+| P0: RSS → MQ → AI → ES 管道 | ✅ |
+| P1: RocketMQ + AI Consumer | ✅ |
+| P2: 暗黑模式 + 个人中心 + AppLayout + 响应式 | ✅ |
+| P2: 中英文切换 — UI 标签 | ✅ |
+| **P2: 中英文切换 — 内容摘要** | **✅ 本次修复** |
+| AI 双语摘要产出 (117/130篇) | ✅ |
 
-- RocketMQ Topic 创建 ✅
-- AI Consumer 对接 MQ ✅
-- Spring @Scheduled RSS 采集 ✅
-- RSS 源种子数据 ✅
-- ES IK 分词器 + Mapping ✅
-- 端到端管道：RSS → MQ → AI → DB → MQ → ES ✅
-- AI 双语摘要产出 `ai_result` JSON ✅
-- 130 篇文章 / 117 篇有双语摘要 ✅
+## 待推送
 
-## P2 部分完成
+变更未提交，需要 commit + push。
 
-- 暗黑模式切换 ✅
-- 个人中心 ✅
-- 共享 AppLayout ✅
-- 响应式 ✅
-- 中英文切换 — UI 标签 ✅，内容切换 ❌
+## 下个会话可做的事
 
-## 下个会话从这里开始
-
-1. 后端 API 返回 `aiResult` 或按语言返回对应摘要
-2. 前端 NewsCard 根据 locale 显示对应语言摘要
-3. 前端 NewsDetail 根据 locale 显示对应语言内容
-4. 浏览器验证完整中英文切换效果
-
-## 已推送
-
-- commit `923bf0c` on master
-- 46 files, +1898/-429 lines
+- 启动应用端到端验证中英文切换效果（切 EN 后新闻卡片和详情页显示英文）
+- P3: 搜索增强（ES 全文搜索替代 MySQL LIKE）
+- P3: 用户个性化推荐
+- P3: 移动端适配 / Flutter APP 启动

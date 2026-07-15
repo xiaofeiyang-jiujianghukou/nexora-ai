@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 新闻详情 VO
@@ -41,8 +42,11 @@ public class NewsDetailVO {
 
     private Integer status;
 
-    // AI 分析
+    // AI 分析 (旧版兼容，新代码优先用 aiResult)
     private AiAnalysisVO aiAnalysis;
+
+    /** 多语言 AI 分析结果 JSON (zh/en summary, facts, background, impact) */
+    private Map<String, Object> aiResult;
 
     // 标签
     private List<String> tags;

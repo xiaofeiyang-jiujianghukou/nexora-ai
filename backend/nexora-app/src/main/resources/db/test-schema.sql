@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS news_article
     title        VARCHAR(512) NOT NULL,
     content      CLOB,
     summary      CLOB,
+    ai_result    CLOB,
     source_id    BIGINT,
     source_url   VARCHAR(1024),
     language     VARCHAR(16)  NOT NULL DEFAULT 'zh-CN',

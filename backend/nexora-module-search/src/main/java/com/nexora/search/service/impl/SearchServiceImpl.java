@@ -3,6 +3,7 @@ package com.nexora.search.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nexora.common.response.PageResult;
+import com.nexora.common.utils.JsonUtils;
 import com.nexora.news.entity.NewsArticleDO;
 import com.nexora.news.mapper.NewsArticleMapper;
 import com.nexora.news.mapper.NewsCategoryMapper;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -55,11 +57,25 @@ public class SearchServiceImpl implements SearchService {
                             .id(a.getId()).title(a.getTitle()).summary(a.getSummary())
                             .sourceName(src).categoryName(cat)
                             .hotScore(a.getHotScore()).viewCount(a.getViewCount())
+                            .aiResult(parseAiResult(a.getAiResult()))
                             .publishTime(a.getPublishTime()).build();
                 })
                 .collect(Collectors.toList());
 
         return PageResult.of(list, pageResult.getTotal(), page, size);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> parseAiResult(String aiResultJson) {
+        if (aiResultJson == null || aiResultJson.isBlank()) {
+            return null;
+        }
+        try {
+            return JsonUtils.fromJson(aiResultJson, Map.class);
+        } catch (Exception e) {
+            log.warn("Failed to parse aiResult JSON for search display", e);
+            return null;
+        }
     }
 
     @Override

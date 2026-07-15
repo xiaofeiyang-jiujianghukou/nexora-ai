@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nexora.common.enums.GlobalErrorCode;
 import com.nexora.common.exception.BusinessException;
 import com.nexora.common.response.PageResult;
+import com.nexora.common.utils.JsonUtils;
 import com.nexora.news.entity.NewsArticleDO;
 import com.nexora.news.entity.NewsCategoryDO;
 import com.nexora.news.entity.NewsSourceDO;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -129,6 +131,7 @@ public class NewsServiceImpl implements NewsService {
                 .categoryName(categoryName)
                 .hotScore(a.getHotScore())
                 .viewCount(a.getViewCount())
+                .aiResult(parseAiResult(a.getAiResult()))
                 .publishTime(a.getPublishTime())
                 .build();
     }
@@ -158,8 +161,22 @@ public class NewsServiceImpl implements NewsService {
                 .viewCount(a.getViewCount())
                 .likeCount(a.getLikeCount())
                 .status(a.getStatus())
+                .aiResult(parseAiResult(a.getAiResult()))
                 .publishTime(a.getPublishTime())
                 .createdTime(a.getCreatedTime())
                 .build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> parseAiResult(String aiResultJson) {
+        if (aiResultJson == null || aiResultJson.isBlank()) {
+            return null;
+        }
+        try {
+            return JsonUtils.fromJson(aiResultJson, Map.class);
+        } catch (Exception e) {
+            log.warn("Failed to parse aiResult JSON for display", e);
+            return null;
+        }
     }
 }

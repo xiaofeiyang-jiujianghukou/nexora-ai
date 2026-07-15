@@ -23,6 +23,8 @@ export interface NewsDetail {
     keywords: string[];
     sentiment: string;
   };
+  /** 多语言 AI 分析结果: { zh: {summary, facts, background, impact}, en: {...}, ... } */
+  aiResult?: Record<string, any>;
 }
 
 export interface Category {
