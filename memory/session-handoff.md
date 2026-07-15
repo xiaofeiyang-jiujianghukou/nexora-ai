@@ -1,64 +1,68 @@
 ---
 name: session-handoff
-description: Where to resume — P3 DevOps & architecture polish
+description: 下个会话起点 — 中英文内容切换完善
 metadata:
   type: project
 ---
 
 # Session Handoff — 下个会话起点
 
-**日期**: 2026-07-15
+**日期**: 2026-07-15 (end of session)
 **分支**: master
-**状态**: P1+P2 完成并推送，前后端均在运行
+**状态**: P1 完成, P2 部分完成, 中英文切换有遗留
 
-## 已完成
+## 当前问题
 
-### P1 — 消息流水线
-- RocketMQ 集成（自动创建 3 个 Topic）
-- AI Consumer 监听 `nexora-news-ai-task` → `NewsAIManager.analyze()` → 写回 DB
-- ES Index Consumer 监听 `nexora-news-index-task`
-- Spring @Scheduled 定时 RSS 采集（12 个源，10 分钟间隔）
-- Flyway 种子数据（11 个 RSS 源 + `ai_result` JSON 列）
-- IK 分词器安装脚本
-- MQ 使用原生 Producer + MessageExt Consumer 解决 UTF-8 编码
+**中英文切换不完整**：导航标签等 UI 文字能切换，但新闻卡片和详情页的摘要始终显示中文。
+用户切换 EN 后，期望看到英文摘要。
 
-### P2 — 前端增强
-- 暗黑模式 toggle（`data-theme` + `html.dark` + Element Plus 同步）
-- 中英文切换（`el-config-provider` 动态 locale + 全页面 i18n）
-- 个人中心完善（用户信息 + 编辑 + 主题/语言设置）
-- 共享 `AppLayout.vue`（Logo + 搜索 + 导航 + 主题 + 语言 + 用户菜单）
-- 全页面响应式 768px 适配
+## 根因
 
-### AI 双语
-- `ai_result` JSON 列存多语言（`{"zh":{...},"en":{...}}`），可无限扩展
-- Prompt 工程：中英文各有 schema 定义 + 示例输出
-- `responseLen` 从 2 字符 → 200~578 字符
+AI 已产出双语摘要存入 `ai_result` JSON 列：
+```json
+{"zh":{"summary":"中文摘要..."}, "en":{"summary":"English summary..."}, "category":"...", ...}
+```
 
-### 关键 Bug 修复
-- MQ UTF-8 编码：Native Producer + MessageExt
-- Prompt 空系统消息 → 明确 system prompt
-- `String.formatted()` 中 `%` 导致格式异常 → 改拼接
-- JSON 字段代替列膨胀（`ai_result`）
+但前端没有读取和切换这个字段：
+- NewsCard: `summaryText` 检查 `item.summaryEn`（已不存在的列）
+- NewsDetail: 没有从 `ai_result` 取对应语言
+- 后端 API 返回的 VO 没有包含 `aiResult` 字段
 
-## 下一步：P3 DevOps
+## 需要做的事
 
-1. **CI/CD** — GitHub Actions（compile → test → build）
-2. **application-prod.yml** — 生产环境配置
-3. **Prometheus + Grafana** — 监控面板
-4. **Flutter APP 初始化** — 移动端项目骨架
+1. **后端** — 修改新闻列表/详情 API，返回 `ai_result` 中当前语言对应的 summary
+   - 方案A: API 返回 `aiResult` JSON，前端解析
+   - 方案B: 后端根据 `Accept-Language` header 返回对应语言内容
+2. **前端** — NewsCard + NewsDetail 根据 `locale` 从 `ai_result` 取对应语言摘要
+3. **验证** — 切换 EN 后新闻卡片和详情页显示英文摘要
 
-## 新增/修改 35+ 文件
+## P1 已完成（已验证）
 
-| 层级 | 关键文件 |
-|------|----------|
-| DB | V1.0.1 seed RSS, V1.0.3 ai_result column |
-| 后端 | MQ Config/Consumer/Producer/Scheduler, Event, AI Manager/Prompt, QualityScorer, Entity |
-| 部署 | broker.conf, install-es-ik.ps1, docker-compose fix |
-| 前端 | AppLayout, settingsStore, 全部页面重写, i18n 词典扩充 |
+- RocketMQ Topic 创建 ✅
+- AI Consumer 对接 MQ ✅
+- Spring @Scheduled RSS 采集 ✅
+- RSS 源种子数据 ✅
+- ES IK 分词器 + Mapping ✅
+- 端到端管道：RSS → MQ → AI → DB → MQ → ES ✅
+- AI 双语摘要产出 `ai_result` JSON ✅
+- 130 篇文章 / 117 篇有双语摘要 ✅
 
-## 运行状态
+## P2 部分完成
 
-- `http://localhost:5173` — 前端
-- `http://localhost:8080` — 后端
-- Docker 7 个中间件全部在线
-- 130 篇新闻，117 篇有双语 AI 摘要
+- 暗黑模式切换 ✅
+- 个人中心 ✅
+- 共享 AppLayout ✅
+- 响应式 ✅
+- 中英文切换 — UI 标签 ✅，内容切换 ❌
+
+## 下个会话从这里开始
+
+1. 后端 API 返回 `aiResult` 或按语言返回对应摘要
+2. 前端 NewsCard 根据 locale 显示对应语言摘要
+3. 前端 NewsDetail 根据 locale 显示对应语言内容
+4. 浏览器验证完整中英文切换效果
+
+## 已推送
+
+- commit `923bf0c` on master
+- 46 files, +1898/-429 lines

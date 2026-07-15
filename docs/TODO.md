@@ -121,7 +121,7 @@ RSS采集 → MQ(collected) → 清洗入库 → MQ(ai-task) → AI分析 → DB
 | 事项 | 说明 | 状态 |
 |------|------|------|
 | **暗黑模式切换按钮** | 头部 Moon/Sun 图标一键切换；`data-theme` + `html.dark` 双通道；Element Plus 深色同步 | ✅ |
-| **中/英文切换按钮** | 头部 EN/中文 按钮；`el-config-provider` 同步 Element Plus 国际化 | ✅ |
+| **中/英文切换按钮** | 头部 EN/中文 按钮；`el-config-provider` 同步 Element Plus 国际化；**内容摘要切换待完善** | ⚠️ 部分完成 |
 | **个人中心页面完善** | 用户信息展示 + 编辑昵称；主题/语言设置卡片；ElSwitch 切换 | ✅ |
 | **共享布局组件** | `AppLayout.vue` 统一头部（Logo + 搜索 + 导航 + 主题 + 语言 + 用户菜单） | ✅ |
 | **响应式移动端适配** | 全部页面添加 `@media (max-width: 768px)` 断点；导航文字隐藏；搜索栏折叠 | ✅ |
