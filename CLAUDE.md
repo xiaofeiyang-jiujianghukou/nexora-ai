@@ -1,6 +1,6 @@
 # CLAUDE.md — Nexora AI 项目开发指南
 
-> **GitHub**: https://github.com/xiaofeiyang-jiujianghukou/nexora-aI.git
+> **GitHub**: https://github.com/xiaofeiyang-jiujianghukou/nexora-ai.git
 
 ## 项目概述
 
