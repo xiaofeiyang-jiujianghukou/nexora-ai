@@ -21,7 +21,11 @@
     "back": "Back",
     "more": "View More",
     "refresh": "Refresh",
-    "close": "Close"
+    "close": "Close",
+    "requestFailed": "Request failed",
+    "operationFailed": "Operation failed",
+    "minAgo": "min ago",
+    "hourAgo": "hours ago"
   },
   "auth": {
     "login": "Log In",
@@ -29,10 +33,17 @@
     "email": "Email",
     "password": "Password",
     "nickname": "Nickname",
+    "confirmPassword": "Confirm Password",
     "loginSuccess": "Login successful",
     "registerSuccess": "Registration successful",
     "noAccount": "Don't have an account? Sign up",
-    "hasAccount": "Already have an account? Log in"
+    "hasAccount": "Already have an account? Log in",
+    "emailRequired": "Please enter email",
+    "emailInvalid": "Invalid email format",
+    "passwordRequired": "Please enter password",
+    "nicknameMax": "Max 64 characters",
+    "passwordMismatch": "Passwords do not match",
+    "reEnterPassword": "Re-enter password"
   },
   "news": {
     "hot": "Hot Topics",
@@ -50,6 +61,8 @@
     "viewOriginal": "View Original",
     "favorite": "Favorite",
     "unfavorite": "Unfavorite",
+    "favoriteAdded": "Added to favorites",
+    "favoriteRemoved": "Removed from favorites",
     "publishTime": "Published",
     "hotScore": "Hot Score",
     "readCount": "Views"
@@ -62,7 +75,8 @@
     "filter": "Filter",
     "category": "Category",
     "dateRange": "Date Range",
-    "source": "Source"
+    "source": "Source",
+    "hint": "Enter keywords to search news"
   },
   "user": {
     "profile": "Profile",
@@ -80,6 +94,13 @@
     "tag": "Tag",
     "entity": "Entity",
     "category": "Category",
-    "company": "Company"
+    "company": "Company",
+    "addSuccess": "Subscribed successfully",
+    "removeSuccess": "Unsubscribed"
+  },
+  "page": {
+    "home": "Home",
+    "newsDetail": "News Detail",
+    "search": "Search"
   }
 }

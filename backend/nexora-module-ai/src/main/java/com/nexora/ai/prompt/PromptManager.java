@@ -53,28 +53,39 @@ public class PromptManager {
     private String getDefaultPrompt(String name) {
         return switch (name) {
             case "news-summary" -> """
-                    role:
-                      system: 你是一名专业新闻编辑
-                    task: 请用中文总结以下新闻，输出JSON格式：
+                    请用中文分析以下新闻，输出严格JSON（不要markdown代码块，不要任何解释文字）：
                     {
-                      "summary": "200字以内的摘要",
-                      "facts": ["事实1", "事实2"],
-                      "background": "事件背景",
-                      "impact": "影响分析"
+                      "summary": "2-3句话概括新闻核心内容，100-200字",
+                      "facts": ["关键事实1", "关键事实2", "关键事实3"],
+                      "background": "事件背景和相关上下文，50-100字",
+                      "impact": "该事件可能产生的影响，50-100字"
                     }
+
+                    示例输出：
+                    {"summary":"苹果发布了搭载M4芯片的新MacBook Pro，性能大幅提升。","facts":["M4芯片采用2nm工艺","CPU性能提升50%","电池续航24小时"],"background":"这是苹果继M3之后的新一代芯片，延续了每年更新一次的节奏。","impact":"将进一步巩固苹果在高端笔记本市场的领先地位，推动整个行业向ARM架构迁移。"}
+
                     新闻内容：{{content}}
                     """;
             case "news-classify" -> """
-                    role:
-                      system: 你是一名新闻分类专家
-                    task: 请将以下新闻分类，可选: 国内/国际/科技/AI/财经/社会/体育
+                    请将以下新闻分类。输出严格JSON（不要markdown代码块）：
+                    {"category":"类别名称","subCategory":"子类别"}
+
+                    可用类别：科技、AI、财经、国际、国内、社会、体育
+                    子类别示例：智能手机、人工智能、金融、外交、教育、足球
+
                     新闻标题：{{title}}
                     新闻内容：{{content}}
                     """;
             case "entity-extract" -> """
-                    role:
-                      system: 你是一名信息抽取专家
-                    task: 从以下新闻中提取实体 (公司/人物/国家/产品/组织)，输出JSON数组
+                    从以下新闻中提取命名实体。输出严格JSON数组（不要markdown代码块）：
+                    [
+                      {"name":"实体名","type":"类型标签"}
+                    ]
+
+                    类型标签可选：公司、人物、国家、产品、组织、城市、技术
+
+                    示例：[{"name":"OpenAI","type":"公司"},{"name":"GPT-6","type":"产品"},{"name":"美国","type":"国家"}]
+
                     新闻内容：{{content}}
                     """;
             default -> "请处理以下内容：{{content}}";

@@ -65,12 +65,14 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { ElMessage } from 'element-plus';
 import type { FormInstance, FormRules } from 'element-plus';
 import { useAuthStore } from '@/stores/authStore';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { t } = useI18n();
 
 const formRef = ref<FormInstance>();
 const loading = ref(false);
@@ -91,20 +93,20 @@ const validateConfirm = (_rule: unknown, value: string, callback: (e?: Error) =>
 
 const rules: FormRules = {
   nickname: [
-    { required: true, message: '请输入昵称', trigger: 'blur' },
-    { max: 64, message: '昵称最长 64 字符', trigger: 'blur' },
+    { required: true, message: () => t('auth.nicknameMax'), trigger: 'blur' },
+    { max: 64, message: () => t('auth.nicknameMax'), trigger: 'blur' },
   ],
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '邮箱格式不正确', trigger: 'blur' },
+    { required: true, message: () => t('auth.emailRequired'), trigger: 'blur' },
+    { type: 'email', message: () => t('auth.emailInvalid'), trigger: 'blur' },
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少 6 位', trigger: 'blur' },
-    { max: 32, message: '密码最长 32 位', trigger: 'blur' },
+    { required: true, message: () => t('auth.passwordRequired'), trigger: 'blur' },
+    { min: 6, message: () => t('auth.passwordRequired'), trigger: 'blur' },
+    { max: 32, message: () => t('auth.passwordRequired'), trigger: 'blur' },
   ],
   confirmPassword: [
-    { required: true, message: '请再次输入密码', trigger: 'blur' },
+    { required: true, message: () => t('auth.passwordRequired'), trigger: 'blur' },
     { validator: validateConfirm, trigger: 'blur' },
   ],
 };
@@ -121,10 +123,10 @@ async function handleRegister() {
       password: form.password,
       nickname: form.nickname,
     });
-    ElMessage.success('注册成功，请登录');
+    ElMessage.success(t('auth.registerSuccess'));
     router.push('/login');
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : '注册失败';
+    const msg = e instanceof Error ? e.message : t('common.operationFailed');
     ElMessage.error(msg);
   } finally {
     loading.value = false;

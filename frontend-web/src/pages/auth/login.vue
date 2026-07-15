@@ -47,6 +47,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { ElMessage } from 'element-plus';
 import type { FormInstance, FormRules } from 'element-plus';
 import { useAuthStore } from '@/stores/authStore';
@@ -54,6 +55,7 @@ import { useAuthStore } from '@/stores/authStore';
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+const { t } = useI18n();
 
 const formRef = ref<FormInstance>();
 const loading = ref(false);
@@ -65,12 +67,12 @@ const form = reactive({
 
 const rules: FormRules = {
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '邮箱格式不正确', trigger: 'blur' },
+    { required: true, message: () => t('auth.emailRequired'), trigger: 'blur' },
+    { type: 'email', message: () => t('auth.emailInvalid'), trigger: 'blur' },
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少 6 位', trigger: 'blur' },
+    { required: true, message: () => t('auth.passwordRequired'), trigger: 'blur' },
+    { min: 6, message: () => t('auth.passwordRequired'), trigger: 'blur' },
   ],
 };
 

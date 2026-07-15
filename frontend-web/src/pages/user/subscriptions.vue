@@ -1,37 +1,35 @@
 <template>
   <div class="sub-page">
-    <el-container>
-      <el-header class="page-header">
-        <router-link to="/" class="back-link">← {{ $t('common.back') }}</router-link>
-        <h2>{{ $t('subscribe.title') }}</h2>
-      </el-header>
+    <div class="page-topbar">
+      <router-link to="/" class="back-link">← {{ $t('common.back') }}</router-link>
+      <h2 class="page-title">{{ $t('subscribe.title') }}</h2>
+    </div>
 
-      <el-main class="page-main">
-        <!-- 添加订阅 -->
-        <div class="add-section">
-          <el-select v-model="subType" class="type-select">
-            <el-option label="标签" value="TAG" />
-            <el-option label="实体" value="ENTITY" />
-            <el-option label="分类" value="CATEGORY" />
-            <el-option label="公司" value="COMPANY" />
-          </el-select>
-          <el-input v-model="subTarget" placeholder="输入订阅目标，如 OpenAI" class="target-input" />
-          <el-button type="primary" @click="addSub">{{ $t('subscribe.add') }}</el-button>
-        </div>
+    <div class="page-main">
+      <!-- 添加订阅 -->
+      <div class="add-section">
+        <el-select v-model="subType" class="type-select" size="default">
+          <el-option :label="$t('subscribe.tag')" value="TAG" />
+          <el-option :label="$t('subscribe.entity')" value="ENTITY" />
+          <el-option :label="$t('subscribe.category')" value="CATEGORY" />
+          <el-option :label="$t('subscribe.company')" value="COMPANY" />
+        </el-select>
+        <el-input v-model="subTarget" :placeholder="$t('subscribe.target')" class="target-input" @keyup.enter="addSub" />
+        <el-button type="primary" @click="addSub">{{ $t('subscribe.add') }}</el-button>
+      </div>
 
-        <!-- 订阅列表 -->
-        <div v-loading="loading" class="sub-list">
-          <template v-if="subs.length">
-            <div v-for="sub in subs" :key="sub.id" class="sub-item">
-              <el-tag>{{ sub.type }}</el-tag>
-              <span class="sub-target">{{ sub.target }}</span>
-              <el-button text type="danger" @click="removeSub(sub.id)">{{ $t('common.delete') }}</el-button>
-            </div>
-          </template>
-          <el-empty v-else :description="$t('common.empty')" />
-        </div>
-      </el-main>
-    </el-container>
+      <!-- 订阅列表 -->
+      <div v-loading="loading" class="sub-list">
+        <template v-if="subs.length">
+          <div v-for="sub in subs" :key="sub.id" class="sub-item">
+            <el-tag size="small">{{ sub.type }}</el-tag>
+            <span class="sub-target">{{ sub.target }}</span>
+            <el-button text type="danger" size="small" @click="removeSub(sub.id)">{{ $t('common.delete') }}</el-button>
+          </div>
+        </template>
+        <el-empty v-else :description="$t('common.empty')" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -81,14 +79,30 @@ onMounted(fetch);
 </script>
 
 <style scoped>
-.sub-page { min-height: 100vh; background: var(--bg-secondary); }
-.page-header { display: flex; align-items: center; gap: 16px; padding: 0 24px; height: 56px; background: var(--header-bg); border-bottom: 1px solid var(--border-color); }
+.sub-page {
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+}
+.page-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0 16px;
+}
 .back-link { font-size: 15px; color: var(--accent-color); }
-.page-main { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+.page-title { font-size: 20px; font-weight: 600; margin: 0; color: var(--text-primary); }
+.page-main { min-height: 300px; }
 .add-section { display: flex; gap: 10px; margin-bottom: 24px; }
 .type-select { width: 100px; }
 .target-input { flex: 1; }
 .sub-list { min-height: 200px; }
 .sub-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
-.sub-target { flex: 1; font-size: 15px; }
+.sub-target { flex: 1; font-size: 15px; color: var(--text-primary); }
+
+@media (max-width: 768px) {
+  .sub-page { max-width: 100%; }
+  .add-section { flex-direction: column; }
+  .type-select { width: 100%; }
+}
 </style>

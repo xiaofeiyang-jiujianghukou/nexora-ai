@@ -2,6 +2,7 @@ package com.nexora;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Nexora AI — 应用主入口
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 其他模块禁止声明 @SpringBootApplication。
  */
 @SpringBootApplication
+@EnableScheduling
 public class NexoraApplication {
 
     public static void main(String[] args) {

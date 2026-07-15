@@ -1,33 +1,37 @@
 <template>
   <div class="search-page">
-    <el-container>
-      <el-header class="page-header">
-        <router-link to="/" class="back-link">← {{ $t('common.back') }}</router-link>
-        <el-input
-          v-model="keyword"
-          :placeholder="$t('search.placeholder')"
-          class="search-input-lg"
-          clearable
-          @keyup.enter="doSearch"
-        >
-          <template #prefix><el-icon><Search /></el-icon></template>
-        </el-input>
-        <el-button type="primary" @click="doSearch">{{ $t('search.results') }}</el-button>
-      </el-header>
+    <!-- 搜索栏 -->
+    <div class="search-bar">
+      <el-input
+        v-model="keyword"
+        :placeholder="$t('search.placeholder')"
+        size="large"
+        clearable
+        @keyup.enter="doSearch"
+      >
+        <template #prefix><el-icon><Search /></el-icon></template>
+      </el-input>
+      <el-button type="primary" size="large" @click="doSearch">
+        <el-icon><Search /></el-icon>
+        {{ $t('search.results') }}
+      </el-button>
+    </div>
 
-      <el-main class="page-main">
-        <div v-if="searched" class="results-header">
-          "{{ searchedKeyword }}" — {{ total }} {{ $t('search.results') }}
-        </div>
+    <!-- 结果 -->
+    <div v-if="searched" class="results-header">
+      "{{ searchedKeyword }}" — {{ total }} {{ $t('search.results') }}
+    </div>
 
-        <div v-loading="loading" class="results-list">
-          <template v-if="results.length">
-            <NewsCard v-for="item in results" :key="item.id" :item="item" />
-          </template>
-          <el-empty v-else-if="searched" :description="$t('search.noResults')" />
-        </div>
-      </el-main>
-    </el-container>
+    <div v-loading="loading" class="results-list">
+      <template v-if="results.length">
+        <NewsCard v-for="item in results" :key="item.id" :item="item" />
+      </template>
+      <el-empty v-else-if="searched" :description="$t('search.noResults')" />
+      <div v-else class="search-hint">
+        <el-icon :size="48" color="var(--text-placeholder)"><Search /></el-icon>
+        <p>输入关键词搜索新闻</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -73,15 +77,46 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.search-page { min-height: 100vh; background: var(--bg-secondary); }
-.page-header {
-  display: flex; align-items: center; gap: 12px; padding: 0 24px;
-  height: 60px; background: var(--header-bg);
-  border-bottom: 1px solid var(--border-color);
+.search-page {
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
 }
-.back-link { font-size: 15px; color: var(--accent-color); flex-shrink: 0; }
-.search-input-lg { width: 480px; }
-.page-main { max-width: 760px; margin: 0 auto; padding: 24px 16px; }
-.results-header { font-size: 15px; color: var(--text-secondary); margin-bottom: 16px; }
-.results-list { min-height: 300px; }
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.search-bar .el-input {
+  flex: 1;
+}
+.results-header {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+.results-list {
+  min-height: 300px;
+}
+.search-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 0;
+  color: var(--text-secondary);
+}
+.search-hint p {
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .search-page {
+    max-width: 100%;
+  }
+  .search-bar {
+    flex-direction: column;
+  }
+}
 </style>

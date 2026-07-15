@@ -5,7 +5,7 @@
       <span v-if="item.hotScore && item.hotScore > 50" class="hot-badge">🔥</span>
     </div>
 
-    <p v-if="item.summary" class="card-summary">{{ item.summary }}</p>
+    <p v-if="summaryText" class="card-summary">{{ summaryText }}</p>
 
     <div class="card-meta">
       <span v-if="item.sourceName" class="meta-source">{{ item.sourceName }}</span>
@@ -35,11 +35,13 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 export interface NewsItem {
   id: number;
   title: string;
   summary?: string;
+  summaryEn?: string;
   sourceName?: string;
   categoryName?: string;
   hotScore?: number;
@@ -50,6 +52,12 @@ export interface NewsItem {
 
 const props = defineProps<{ item: NewsItem }>();
 const router = useRouter();
+const { t, locale } = useI18n();
+const summaryText = computed(() =>
+  locale.value === 'en-US' && props.item.summaryEn
+    ? props.item.summaryEn
+    : props.item.summary
+);
 
 function goDetail() {
   router.push(`/news/${props.item.id}`);
@@ -60,8 +68,8 @@ function formatTime(time?: string): string {
   const d = new Date(time);
   const now = new Date();
   const diff = now.getTime() - d.getTime();
-  if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
-  if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+  if (diff < 3600000) return Math.floor(diff / 60000) + t('common.minAgo');
+  if (diff < 86400000) return Math.floor(diff / 3600000) + t('common.hourAgo');
   return d.toLocaleDateString('zh-CN');
 }
 </script>

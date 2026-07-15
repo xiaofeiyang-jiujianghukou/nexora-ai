@@ -9,6 +9,18 @@ spring:
       host: localhost
       port: 6379
 
+  elasticsearch:
+    uris: http://localhost:9200
+
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    group: nexora-producer-group
+
+nexora:
+  elasticsearch:
+    enabled: true
+
 logging:
   level:
     com.nexora: DEBUG

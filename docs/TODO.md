@@ -1,6 +1,6 @@
 # Nexora AI — 开发日志
 
-> 最后更新：2026-07-15 (evening)    
+> 最后更新：2026-07-15 (P1+P2 completed, AI bilingual done)    
 > GitHub：https://github.com/xiaofeiyang-jiujianghukou/nexora-ai.git
 
 ---
@@ -97,33 +97,56 @@ cd frontend-web && npm install && npm run dev
 | **插入测试数据** | 已验证：4 用户 / 8 文章 / 5 来源 / 7 分类 | ✅ |
 | **运行全量测试** | 后端 35 + E2E 4 = 39 tests，0 failures | ✅ |
 
-## 🔜 下个会话从这里开始 → P1
+## 🔜 下个会话从这里开始 → P2
 
-### P1 — 需要额外配置
+### P1 — 消息流水线 ✅ (已完成)
 
-**推荐执行顺序：**
-1. RocketMQ Topic 创建（打通消息流水线的前提）
-2. AI Consumer 对接 MQ（消费 Topic → 自动 AI 分析）
-3. XXL-JOB 调度中心部署（定时 RSS 采集）
-4. RSS 源 URL 配置（录入真实 RSS 地址后即可端到端跑通）
-5. ES IK 分词器 + Mapping（搜索升级，可并行）
+**于 2026-07-15 完成：**
 
-| # | 事项 | 依赖 | 详细说明 |
-|---|------|------|----------|
-| 1 | **RocketMQ Topic 创建** | Docker 中间件已运行 | 需创建 3 个 Topic：`nexora-news-collected` / `nexora-news-ai-task` / `nexora-news-index-task` |
-| 2 | **AI Consumer 对接 MQ** | 依赖 #1 | 消费 `nexora-news-ai-task` → 自动 AI 分析（摘要/分类/实体识别），利用已配置的 LLM_API_KEY |
-| 3 | **XXL-JOB 调度中心部署** | Docker 部署 | 用于定时 RSS 采集调度 |
-| 4 | **RSS 源 URL 配置** | 依赖 #1 | 在 `news_source` 表录入真实 RSS 地址，端到端验证采集→AI→索引流水线 |
-| 5 | **ES IK 分词器 + Mapping** | ES 容器已运行 | 创建中文分词索引，搜索从 MySQL LIKE 切换为 Elasticsearch |
+| # | 事项 | 状态 | 说明 |
+|---|------|------|------|
+| 1 | **RocketMQ Topic 创建** | ✅ | `RocketMQConfig` 启动时自动创建 3 个 Topic；Maven 依赖+配置完整 |
+| 2 | **AI Consumer 对接 MQ** | ✅ | `AITaskConsumer` → `NewsAIManager.analyze()` → 写回文章摘要+分类 → 发送 ES 索引任务 |
+| 3 | **调度中心** | ✅ | 使用 Spring `@Scheduled`（替代 XXL-JOB），`NewsCollectScheduler` 每 10 分钟扫描 RSS |
+| 4 | **RSS 源配置** | ✅ | Flyway V1.0.1 插入 11 个 RSS 源（TechCrunch/BBC/Reuters/36氪等） |
+| 5 | **ES IK 分词器** | ✅ | `IndexTaskConsumer` → ES 索引；`ESIndexInitializer` 启动建索引；`install-es-ik.ps1` |
 
-### P2 — 前端增强
+**消息流水线链路已完整打通：**
+```
+RSS采集 → MQ(collected) → 清洗入库 → MQ(ai-task) → AI分析 → DB更新 → MQ(index-task) → ES索引
+```
 
-| 事项 | 说明 |
+### P2 — 前端增强 ✅ (已完成)
+
+| 事项 | 说明 | 状态 |
+|------|------|------|
+| **暗黑模式切换按钮** | 头部 Moon/Sun 图标一键切换；`data-theme` + `html.dark` 双通道；Element Plus 深色同步 | ✅ |
+| **中/英文切换按钮** | 头部 EN/中文 按钮；`el-config-provider` 同步 Element Plus 国际化 | ✅ |
+| **个人中心页面完善** | 用户信息展示 + 编辑昵称；主题/语言设置卡片；ElSwitch 切换 | ✅ |
+| **共享布局组件** | `AppLayout.vue` 统一头部（Logo + 搜索 + 导航 + 主题 + 语言 + 用户菜单） | ✅ |
+| **响应式移动端适配** | 全部页面添加 `@media (max-width: 768px)` 断点；导航文字隐藏；搜索栏折叠 | ✅ |
+
+**新增/修改文件：**
+| 文件 | 说明 |
 |------|------|
-| 暗黑模式切换按钮 | CSS 变量已准备，只需加个 toggle |
-| 中/英文切换按钮 | i18n 已配置 60+ 翻译条 |
-| 个人中心页面完善 | 当前为占位页 |
-| 响应式移动端适配 | - |
+| `src/stores/settingsStore.ts` | 主题 + 语言管理（localStorage 持久化） |
+| `src/components/layout/AppLayout.vue` | 共享布局组件（头部 + slot） |
+| `src/App.vue` | `el-config-provider` 动态国际化；auth 页面排除布局 |
+| `src/main.ts` | Element Plus 暗黑 CSS；移除硬编码 locale |
+| `src/env.d.ts` | Element Plus locale MJS 类型声明 |
+| `src/pages/home/index.vue` | 移除自有 header，使用共享布局 |
+| `src/pages/user/profile.vue` | 完整个人信息 + 主题/语言设置 |
+| `src/pages/news/detail.vue` | 移除自有 header，添加响应式 |
+| `src/pages/search/index.vue` | 移除自有 header，添加搜索引导 |
+| `src/pages/user/favorites.vue` | 移除自有 header，添加响应式 |
+| `src/pages/user/subscriptions.vue` | 移除自有 header，添加响应式 |
+| `src/router/index.ts` | auth 页面添加 `plain: true` meta |
+
+### AI 双语摘要 ✅
+
+- `ai_result` JSON 列：`{"zh":{...},"en":{...}}`，可无限扩展语言
+- 中英文 prompt 各有 schema 定义 + 示例输出
+- `responseLen` 从 2 字符修复到 200~578 字符
 
 ### P3 — DevOps
 

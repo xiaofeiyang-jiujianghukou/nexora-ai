@@ -1,35 +1,64 @@
 ---
 name: session-handoff
-description: Where to resume work next session — P1 message pipeline
+description: Where to resume — P3 DevOps & architecture polish
 metadata:
   type: project
 ---
 
 # Session Handoff — 下个会话起点
 
-**日期**: 2026-07-15 (evening)
-**当前分支**: master
-**状态**: Clean working tree
+**日期**: 2026-07-15
+**分支**: master
+**状态**: P1+P2 完成并推送，前后端均在运行
 
-## 从哪开始：P1 消息流水线对接
+## 已完成
 
-1. **RocketMQ Topic 创建**（前提）
-   - 3 个 Topic：`nexora-news-collected` / `nexora-news-ai-task` / `nexora-news-index-task`
-   - RocketMQ NameServer + Broker 已在 Docker Compose 中运行
-2. **AI Consumer 对接 MQ** — 消费 `nexora-news-ai-task`，自动调用 AI 分析
-3. **XXL-JOB 调度中心部署**
-4. **RSS 源 URL 配置**
-5. **ES IK 分词器 + Mapping**
+### P1 — 消息流水线
+- RocketMQ 集成（自动创建 3 个 Topic）
+- AI Consumer 监听 `nexora-news-ai-task` → `NewsAIManager.analyze()` → 写回 DB
+- ES Index Consumer 监听 `nexora-news-index-task`
+- Spring @Scheduled 定时 RSS 采集（12 个源，10 分钟间隔）
+- Flyway 种子数据（11 个 RSS 源 + `ai_result` JSON 列）
+- IK 分词器安装脚本
+- MQ 使用原生 Producer + MessageExt Consumer 解决 UTF-8 编码
 
-## 已验证的环境状态
-- MySQL 运行中（4 user / 8 article / 5 source / 7 category）
-- LLM_API_KEY 全局环境变量已配置
-- 39 测试全过（后端 35 + E2E 4）
-- 暂无未提交的更改
+### P2 — 前端增强
+- 暗黑模式 toggle（`data-theme` + `html.dark` + Element Plus 同步）
+- 中英文切换（`el-config-provider` 动态 locale + 全页面 i18n）
+- 个人中心完善（用户信息 + 编辑 + 主题/语言设置）
+- 共享 `AppLayout.vue`（Logo + 搜索 + 导航 + 主题 + 语言 + 用户菜单）
+- 全页面响应式 768px 适配
 
-## 关联文档（都已是最新）
-- `docs/TODO.md` — 完整开发日志和任务清单
-- `CLAUDE.md` — 已补充当前进度快照和会话关闭规则
+### AI 双语
+- `ai_result` JSON 列存多语言（`{"zh":{...},"en":{...}}`），可无限扩展
+- Prompt 工程：中英文各有 schema 定义 + 示例输出
+- `responseLen` 从 2 字符 → 200~578 字符
 
-**Why:** 上个会话完成了 Sprint 0~6 的全部开发和测试，P0 全部验证通过。下一步自然进入 P1 消息流水线。
-**How to apply:** 打开 `docs/TODO.md`，从 "🔜 下个会话从这里开始 → P1" 继续，按推荐顺序执行。
+### 关键 Bug 修复
+- MQ UTF-8 编码：Native Producer + MessageExt
+- Prompt 空系统消息 → 明确 system prompt
+- `String.formatted()` 中 `%` 导致格式异常 → 改拼接
+- JSON 字段代替列膨胀（`ai_result`）
+
+## 下一步：P3 DevOps
+
+1. **CI/CD** — GitHub Actions（compile → test → build）
+2. **application-prod.yml** — 生产环境配置
+3. **Prometheus + Grafana** — 监控面板
+4. **Flutter APP 初始化** — 移动端项目骨架
+
+## 新增/修改 35+ 文件
+
+| 层级 | 关键文件 |
+|------|----------|
+| DB | V1.0.1 seed RSS, V1.0.3 ai_result column |
+| 后端 | MQ Config/Consumer/Producer/Scheduler, Event, AI Manager/Prompt, QualityScorer, Entity |
+| 部署 | broker.conf, install-es-ik.ps1, docker-compose fix |
+| 前端 | AppLayout, settingsStore, 全部页面重写, i18n 词典扩充 |
+
+## 运行状态
+
+- `http://localhost:5173` — 前端
+- `http://localhost:8080` — 后端
+- Docker 7 个中间件全部在线
+- 130 篇新闻，117 篇有双语 AI 摘要

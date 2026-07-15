@@ -24,13 +24,13 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     name: 'login',
     component: () => import('@/pages/auth/login.vue'),
-    meta: { title: '登录', guest: true },
+    meta: { title: '登录', guest: true, plain: true },
   },
   {
     path: '/register',
     name: 'register',
     component: () => import('@/pages/auth/register.vue'),
-    meta: { title: '注册', guest: true },
+    meta: { title: '注册', guest: true, plain: true },
   },
   {
     path: '/user/profile',

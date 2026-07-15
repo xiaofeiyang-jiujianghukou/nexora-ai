@@ -1,22 +1,20 @@
 <template>
   <div class="fav-page">
-    <el-container>
-      <el-header class="page-header">
-        <router-link to="/" class="back-link">← {{ $t('common.back') }}</router-link>
-        <h2>{{ $t('nav.favorites') }}</h2>
-      </el-header>
+    <div class="page-topbar">
+      <router-link to="/" class="back-link">← {{ $t('common.back') }}</router-link>
+      <h2 class="page-title">{{ $t('nav.favorites') }}</h2>
+    </div>
 
-      <el-main v-loading="favStore.loading" class="page-main">
-        <template v-if="favStore.favorites.length">
-          <NewsCard
-            v-for="item in favStore.favorites"
-            :key="item.id"
-            :item="item"
-          />
-        </template>
-        <el-empty v-else :description="$t('common.empty')" />
-      </el-main>
-    </el-container>
+    <div v-loading="favStore.loading" class="page-main">
+      <template v-if="favStore.favorites.length">
+        <NewsCard
+          v-for="item in favStore.favorites"
+          :key="item.id"
+          :item="item"
+        />
+      </template>
+      <el-empty v-else :description="$t('common.empty')" />
+    </div>
   </div>
 </template>
 
@@ -31,12 +29,22 @@ onMounted(() => favStore.fetchFavorites());
 </script>
 
 <style scoped>
-.fav-page { min-height: 100vh; background: var(--bg-secondary); }
-.page-header {
-  display: flex; align-items: center; gap: 16px; padding: 0 24px;
-  height: 56px; background: var(--header-bg);
-  border-bottom: 1px solid var(--border-color);
+.fav-page {
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+}
+.page-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0 16px;
 }
 .back-link { font-size: 15px; color: var(--accent-color); }
-.page-main { max-width: 760px; margin: 0 auto; padding: 24px 16px; }
+.page-title { font-size: 20px; font-weight: 600; margin: 0; color: var(--text-primary); }
+.page-main { min-height: 400px; }
+
+@media (max-width: 768px) {
+  .fav-page { max-width: 100%; }
+}
 </style>

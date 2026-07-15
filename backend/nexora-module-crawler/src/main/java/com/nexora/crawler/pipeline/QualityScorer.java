@@ -15,9 +15,17 @@ public class QualityScorer {
     private static final Map<String, Integer> SOURCE_WEIGHTS = Map.ofEntries(
             Map.entry("reuters", 95),
             Map.entry("bbc", 90),
+            Map.entry("bbc news", 90),
             Map.entry("新华社", 90),
             Map.entry("techcrunch", 80),
-            Map.entry("36氪", 75)
+            Map.entry("36氪", 75),
+            Map.entry("the verge", 75),
+            Map.entry("ars technica", 70),
+            Map.entry("wired", 75),
+            Map.entry("hacker news", 65),
+            Map.entry("the guardian", 80),
+            Map.entry("少数派", 60),
+            Map.entry("infoq 中文", 65)
     );
 
     /**

@@ -21,7 +21,11 @@
     "back": "返回",
     "more": "查看更多",
     "refresh": "刷新",
-    "close": "关闭"
+    "close": "关闭",
+    "requestFailed": "请求失败",
+    "operationFailed": "操作失败",
+    "minAgo": "分钟前",
+    "hourAgo": "小时前"
   },
   "auth": {
     "login": "登录",
@@ -29,10 +33,17 @@
     "email": "邮箱",
     "password": "密码",
     "nickname": "昵称",
+    "confirmPassword": "确认密码",
     "loginSuccess": "登录成功",
     "registerSuccess": "注册成功",
     "noAccount": "还没有账号？去注册",
-    "hasAccount": "已有账号？去登录"
+    "hasAccount": "已有账号？去登录",
+    "emailRequired": "请输入邮箱",
+    "emailInvalid": "邮箱格式不正确",
+    "passwordRequired": "请输入密码",
+    "nicknameMax": "最多 64 个字符",
+    "passwordMismatch": "两次密码不一致",
+    "reEnterPassword": "再次输入密码"
   },
   "news": {
     "hot": "今日热点",
@@ -50,6 +61,8 @@
     "viewOriginal": "查看原文",
     "favorite": "收藏",
     "unfavorite": "取消收藏",
+    "favoriteAdded": "已收藏",
+    "favoriteRemoved": "已取消收藏",
     "publishTime": "发布时间",
     "hotScore": "热度",
     "readCount": "阅读"
@@ -62,7 +75,8 @@
     "filter": "筛选",
     "category": "分类",
     "dateRange": "时间范围",
-    "source": "来源"
+    "source": "来源",
+    "hint": "输入关键词搜索新闻"
   },
   "user": {
     "profile": "个人信息",
@@ -80,6 +94,13 @@
     "tag": "标签",
     "entity": "实体",
     "category": "分类",
-    "company": "公司"
+    "company": "公司",
+    "addSuccess": "订阅成功",
+    "removeSuccess": "已取消"
+  },
+  "page": {
+    "home": "首页",
+    "newsDetail": "新闻详情",
+    "search": "搜索"
   }
 }

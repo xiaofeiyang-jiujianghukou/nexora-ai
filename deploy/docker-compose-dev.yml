@@ -79,12 +79,14 @@ services:
     image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/rocketmq:5.2.0
     container_name: nexora-rmq-broker
     restart: unless-stopped
-    command: sh mqbroker -n rocketmq-namesrv:9876 --enable-proxy
+    command: sh mqbroker -n rocketmq-namesrv:9876 --enable-proxy -c /home/rocketmq/rocketmq-5.2.0/conf/broker.conf
     ports:
       - "10909:10909"
       - "10911:10911"
+    volumes:
+      - ./rocketmq-broker.conf:/home/rocketmq/rocketmq-5.2.0/conf/broker.conf
     environment:
-      JAVA_OPT_EXT: "-Xms512m -Xmx512m"
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m -Drocketmq.broker.ip1=127.0.0.1"
     depends_on:
       rocketmq-namesrv:
         condition: service_healthy
