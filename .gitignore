@@ -28,5 +28,8 @@ Thumbs.db
 # Maven
 .mvn/wrapper/maven-wrapper.jar
 
+# Test output
+test-results/
+
 # Java
 hs_err_pid*
