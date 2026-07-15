@@ -2,6 +2,7 @@ package com.nexora.config;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.apache.ibatis.reflection.MetaObject;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
@@ -17,11 +18,13 @@ import java.time.LocalDateTime;
 public class MyBatisPlusConfig {
 
     /**
-     * 分页插件 — 后续按需添加 PaginationInnerInterceptor
+     * 分页插件
      */
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
-        return new MybatisPlusInterceptor();
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
+        return interceptor;
     }
 
     /**

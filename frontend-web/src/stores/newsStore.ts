@@ -11,6 +11,7 @@ export interface NewsDetail {
   sourceName: string;
   sourceUrl: string;
   categoryName: string;
+  categoryCode: string;
   hotScore: number;
   viewCount: number;
   likeCount: number;
@@ -38,16 +39,40 @@ export const useNewsStore = defineStore('news', () => {
   const hotList = ref<NewsItem[]>([]);
   const categories = ref<Category[]>([]);
   const loading = ref(false);
+  const loadingMore = ref(false);
+  const currentPage = ref(0);
+  const hasMore = ref(true);
+  const currentCategoryId = ref<number | undefined>(undefined);
 
   async function fetchHotList(categoryId?: number) {
+    currentCategoryId.value = categoryId;
     loading.value = true;
     try {
       const res = await http.get('/api/v1/news/list', {
         params: { page: 1, size: 20, categoryId },
       });
       hotList.value = res.data.list || [];
+      currentPage.value = 1;
+      hasMore.value = (res.data.list?.length || 0) >= 20;
     } finally {
       loading.value = false;
+    }
+  }
+
+  async function loadMore() {
+    if (!hasMore.value || loadingMore.value) return;
+    loadingMore.value = true;
+    try {
+      const nextPage = currentPage.value + 1;
+      const res = await http.get('/api/v1/news/list', {
+        params: { page: nextPage, size: 20, categoryId: currentCategoryId.value },
+      });
+      const items = res.data.list || [];
+      hotList.value.push(...items);
+      currentPage.value = nextPage;
+      hasMore.value = items.length >= 20;
+    } finally {
+      loadingMore.value = false;
     }
   }
 
@@ -66,5 +91,6 @@ export const useNewsStore = defineStore('news', () => {
     return res.data || [];
   }
 
-  return { hotList, categories, loading, fetchHotList, fetchCategories, getDetail, getRelated };
+  return { hotList, categories, loading, loadingMore, currentPage, hasMore,
+    fetchHotList, loadMore, fetchCategories, getDetail, getRelated };
 });

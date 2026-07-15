@@ -98,6 +98,15 @@
     "addSuccess": "Subscribed successfully",
     "removeSuccess": "Unsubscribed"
   },
+  "category": {
+    "domestic": "Domestic",
+    "international": "International",
+    "technology": "Technology",
+    "ai": "AI",
+    "finance": "Finance",
+    "society": "Society",
+    "sports": "Sports"
+  },
   "page": {
     "home": "Home",
     "newsDetail": "News Detail",

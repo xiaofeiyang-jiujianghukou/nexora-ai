@@ -16,18 +16,20 @@
         size="small"
         @click="selectCategory(cat.id)"
       >
-        {{ cat.name }}
+        {{ $t('category.' + cat.code, cat.name) }}
       </el-button>
     </div>
 
     <!-- 新闻列表 -->
-    <div v-loading="store.loading" class="news-feed">
+    <div v-loading="store.loading" class="news-feed" v-infinite-scroll="onLoadMore"
+         :infinite-scroll-disabled="!store.hasMore" infinite-scroll-distance="100">
       <template v-if="store.hotList.length">
         <NewsCard
           v-for="item in store.hotList"
           :key="item.id"
           :item="item"
         />
+        <div v-if="store.loadingMore" class="load-more-hint">{{ $t('common.loading') }}</div>
       </template>
       <el-empty v-else :description="$t('common.empty')" />
     </div>
@@ -52,6 +54,10 @@ function selectCategory(catId: number | null) {
   store.fetchHotList(catId ?? undefined);
 }
 
+function onLoadMore() {
+  store.loadMore();
+}
+
 onMounted(() => {
   store.fetchCategories();
   store.fetchHotList();
@@ -74,6 +80,12 @@ onMounted(() => {
   max-width: 800px;
   margin: 0 auto;
   min-height: 400px;
+}
+.load-more-hint {
+  text-align: center;
+  padding: 16px;
+  color: var(--text-secondary);
+  font-size: 13px;
 }
 
 @media (max-width: 768px) {

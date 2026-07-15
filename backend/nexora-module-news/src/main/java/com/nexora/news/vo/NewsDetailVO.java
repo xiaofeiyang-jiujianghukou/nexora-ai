@@ -34,6 +34,8 @@ public class NewsDetailVO {
 
     private String categoryName;
 
+    private String categoryCode;
+
     private Double hotScore;
 
     private Integer viewCount;

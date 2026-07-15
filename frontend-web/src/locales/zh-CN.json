@@ -98,6 +98,15 @@
     "addSuccess": "订阅成功",
     "removeSuccess": "已取消"
   },
+  "category": {
+    "domestic": "国内",
+    "international": "国际",
+    "technology": "科技",
+    "ai": "AI",
+    "finance": "财经",
+    "society": "社会",
+    "sports": "体育"
+  },
   "page": {
     "home": "首页",
     "newsDetail": "新闻详情",

@@ -49,15 +49,24 @@ public class SearchServiceImpl implements SearchService {
 
         List<NewsSummaryVO> list = pageResult.getRecords().stream()
                 .map(a -> {
-                    String src = sourceMapper.selectById(a.getSourceId()) != null
-                            ? sourceMapper.selectById(a.getSourceId()).getName() : null;
-                    String cat = categoryMapper.selectById(a.getCategoryId()) != null
-                            ? categoryMapper.selectById(a.getCategoryId()).getName() : null;
+                    String src = null;
+                    String catName = null;
+                    String catCode = null;
+                    if (a.getSourceId() != null) {
+                        var s = sourceMapper.selectById(a.getSourceId());
+                        if (s != null) src = s.getName();
+                    }
+                    if (a.getCategoryId() != null) {
+                        var c = categoryMapper.selectById(a.getCategoryId());
+                        if (c != null) { catName = c.getName(); catCode = c.getCode(); }
+                    }
+                    Map<String, Object> aiResult = parseAiResult(a.getAiResult());
                     return NewsSummaryVO.builder()
                             .id(a.getId()).title(a.getTitle()).summary(a.getSummary())
-                            .sourceName(src).categoryName(cat)
+                            .sourceName(src).categoryName(catName).categoryCode(catCode)
                             .hotScore(a.getHotScore()).viewCount(a.getViewCount())
-                            .aiResult(parseAiResult(a.getAiResult()))
+                            .tags(extractTags(aiResult))
+                            .aiResult(aiResult)
                             .publishTime(a.getPublishTime()).build();
                 })
                 .collect(Collectors.toList());
@@ -76,6 +85,29 @@ public class SearchServiceImpl implements SearchService {
             log.warn("Failed to parse aiResult JSON for search display", e);
             return null;
         }
+    }
+
+    /** 从 aiResult.entities 中提取实体名称作为标签 */
+    @SuppressWarnings("unchecked")
+    private List<String> extractTags(Map<String, Object> aiResult) {
+        if (aiResult == null) return Collections.emptyList();
+        try {
+            Object entitiesObj = aiResult.get("entities");
+            if (entitiesObj instanceof Map) {
+                Map<String, Object> entitiesMap = (Map<String, Object>) entitiesObj;
+                Object items = entitiesMap.get("items");
+                if (items instanceof List) {
+                    return ((List<Map<String, Object>>) items).stream()
+                            .filter(e -> e.containsKey("name") && e.get("name") != null)
+                            .map(e -> e.get("name").toString())
+                            .limit(8)
+                            .collect(Collectors.toList());
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Failed to extract tags from aiResult", e);
+        }
+        return Collections.emptyList();
     }
 
     @Override

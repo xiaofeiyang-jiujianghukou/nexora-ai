@@ -12,13 +12,13 @@
     <div v-loading="loading" class="detail-main">
       <template v-if="detail">
         <!-- 标题 -->
-        <h1 class="detail-title">{{ detail.title }}</h1>
+        <h1 class="detail-title">{{ displayTitle }}</h1>
         <div class="detail-meta">
           <span v-if="detail.sourceName">{{ detail.sourceName }}</span>
           <span>{{ formatDate(detail.publishTime) }}</span>
           <span>👁 {{ detail.viewCount }}</span>
           <span v-if="detail.categoryName">
-            <el-tag size="small">{{ detail.categoryName }}</el-tag>
+            <el-tag size="small">{{ $t('category.' + detail.categoryCode, detail.categoryName) }}</el-tag>
           </span>
         </div>
 
@@ -96,6 +96,16 @@ const isFav = ref(false);
 
 /** 当前语言 key (zh / en)，用于从 aiResult 取对应语言内容 */
 const lang = computed(() => locale.value === 'en-US' ? 'en' : 'zh');
+
+/** 双语标题：优先取 aiResult[lang].title，回退到原始 title */
+const displayTitle = computed(() => {
+  const ai = detail.value?.aiResult;
+  if (ai) {
+    const localized = ai[lang.value] as Record<string, any> | undefined;
+    if (localized?.title) return localized.title as string;
+  }
+  return detail.value?.title || '';
+});
 
 /** 根据当前语言从 aiResult 取 AI 分析内容 */
 const aiSection = computed(() => {

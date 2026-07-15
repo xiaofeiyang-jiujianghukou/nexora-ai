@@ -54,6 +54,14 @@ public class NewsAIManager {
 
         // ---- 组装多语言结果 ----
         Map<String, Object> result = new LinkedHashMap<>();
+
+        // 原标题存入 zh section，英文标题存入 en section
+        if (zh == null) zh = new LinkedHashMap<>();
+        zh.put("title", title != null ? title : "");
+        if (en == null) en = new LinkedHashMap<>();
+        if (!en.containsKey("title") || en.get("title") == null || en.get("title").toString().isBlank()) {
+            en.put("title", title != null ? title : ""); // fallback to original
+        }
         result.put("zh", zh);
         result.put("en", en);
         result.put("category", cls.getOrDefault("category", "科技"));
@@ -72,12 +80,14 @@ public class NewsAIManager {
 
     private String buildEnglishPrompt(String title, String content) {
         return "Analyze this news and output strict JSON (no markdown, no explanation):\n" +
-                "{\"summary\":\"2-3 sentence English summary (80-120 words)\",\n" +
+                "{\"title\":\"English translation of the original title\",\n" +
+                " \"summary\":\"2-3 sentence English summary (80-120 words)\",\n" +
                 " \"facts\":[\"key fact 1\",\"key fact 2\",\"key fact 3\"],\n" +
                 " \"background\":\"context (40-60 words)\",\n" +
                 " \"impact\":\"potential impact (40-60 words)\"}\n\n" +
                 "Example output:\n" +
-                "{\"summary\":\"Apple unveiled its M4-powered MacBook Pro with significant performance gains and extended battery life.\"," +
+                "{\"title\":\"Apple Unveils M4-Powered MacBook Pro with 24-Hour Battery Life\"," +
+                "\"summary\":\"Apple unveiled its M4-powered MacBook Pro with significant performance gains and extended battery life.\"," +
                 "\"facts\":[\"M4 chip uses 2nm process\",\"CPU 50pct faster, GPU 80pct faster\",\"24-hour battery life\"]," +
                 "\"background\":\"This continues Apple's annual chip upgrade cycle following M3.\"," +
                 "\"impact\":\"Further solidifies Apple's lead in high-end laptops and pushes ARM architecture adoption.\"}\n\n" +

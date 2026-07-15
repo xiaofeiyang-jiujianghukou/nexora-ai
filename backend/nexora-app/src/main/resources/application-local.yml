@@ -1,0 +1,2 @@
+nexora.elasticsearch.enabled: false
+nexora.rocketmq.enabled: false

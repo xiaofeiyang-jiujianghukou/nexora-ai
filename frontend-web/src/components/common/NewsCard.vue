@@ -1,7 +1,7 @@
 <template>
   <div class="news-card" @click="goDetail">
     <div class="card-header">
-      <h3 class="card-title">{{ item.title }}</h3>
+      <h3 class="card-title">{{ displayTitle }}</h3>
       <span v-if="item.hotScore && item.hotScore > 50" class="hot-badge">🔥</span>
     </div>
 
@@ -11,7 +11,7 @@
       <span v-if="item.sourceName" class="meta-source">{{ item.sourceName }}</span>
       <span class="meta-time">{{ formatTime(item.publishTime) }}</span>
       <span v-if="item.categoryName" class="meta-category">
-        <el-tag size="small" type="info">{{ item.categoryName }}</el-tag>
+        <el-tag size="small" type="info">{{ categoryLabel }}</el-tag>
       </span>
     </div>
 
@@ -43,6 +43,7 @@ export interface NewsItem {
   summary?: string;
   sourceName?: string;
   categoryName?: string;
+  categoryCode?: string;
   hotScore?: number;
   viewCount?: number;
   tags?: string[];
@@ -57,6 +58,25 @@ const { t, locale } = useI18n();
 
 /** 根据当前语言从 aiResult 取摘要，回退到 summary 字段 */
 const lang = computed(() => locale.value === 'en-US' ? 'en' : 'zh');
+
+/** 双语标题：优先取 aiResult[lang].title，回退到原始 title */
+const displayTitle = computed(() => {
+  const ai = props.item.aiResult;
+  if (ai) {
+    const localized = ai[lang.value] as Record<string, any> | undefined;
+    if (localized?.title) return localized.title as string;
+  }
+  return props.item.title;
+});
+
+/** 分类标签：优先用 code 翻译，回退到原始名称 */
+const categoryLabel = computed(() => {
+  if (props.item.categoryCode) {
+    return t('category.' + props.item.categoryCode, props.item.categoryName || '');
+  }
+  return props.item.categoryName || '';
+});
+
 const summaryText = computed(() => {
   const ai = props.item.aiResult;
   if (ai) {

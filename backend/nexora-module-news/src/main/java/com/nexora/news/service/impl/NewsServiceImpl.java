@@ -117,10 +117,16 @@ public class NewsServiceImpl implements NewsService {
             if (source != null) sourceName = source.getName();
         }
         String categoryName = null;
+        String categoryCode = null;
         if (a.getCategoryId() != null) {
             NewsCategoryDO cat = categoryMapper.selectById(a.getCategoryId());
-            if (cat != null) categoryName = cat.getName();
+            if (cat != null) {
+                categoryName = cat.getName();
+                categoryCode = cat.getCode();
+            }
         }
+
+        Map<String, Object> aiResult = parseAiResult(a.getAiResult());
 
         return NewsSummaryVO.builder()
                 .id(a.getId())
@@ -129,9 +135,11 @@ public class NewsServiceImpl implements NewsService {
                 .sourceName(sourceName)
                 .language(a.getLanguage())
                 .categoryName(categoryName)
+                .categoryCode(categoryCode)
                 .hotScore(a.getHotScore())
                 .viewCount(a.getViewCount())
-                .aiResult(parseAiResult(a.getAiResult()))
+                .tags(extractTags(aiResult))
+                .aiResult(aiResult)
                 .publishTime(a.getPublishTime())
                 .build();
     }
@@ -143,10 +151,16 @@ public class NewsServiceImpl implements NewsService {
             if (source != null) sourceName = source.getName();
         }
         String categoryName = null;
+        String categoryCode = null;
         if (a.getCategoryId() != null) {
             NewsCategoryDO cat = categoryMapper.selectById(a.getCategoryId());
-            if (cat != null) categoryName = cat.getName();
+            if (cat != null) {
+                categoryName = cat.getName();
+                categoryCode = cat.getCode();
+            }
         }
+
+        Map<String, Object> aiResult = parseAiResult(a.getAiResult());
 
         return NewsDetailVO.builder()
                 .id(a.getId())
@@ -157,11 +171,13 @@ public class NewsServiceImpl implements NewsService {
                 .sourceUrl(a.getSourceUrl())
                 .language(a.getLanguage())
                 .categoryName(categoryName)
+                .categoryCode(categoryCode)
                 .hotScore(a.getHotScore())
                 .viewCount(a.getViewCount())
                 .likeCount(a.getLikeCount())
                 .status(a.getStatus())
-                .aiResult(parseAiResult(a.getAiResult()))
+                .tags(extractTags(aiResult))
+                .aiResult(aiResult)
                 .publishTime(a.getPublishTime())
                 .createdTime(a.getCreatedTime())
                 .build();
@@ -178,5 +194,28 @@ public class NewsServiceImpl implements NewsService {
             log.warn("Failed to parse aiResult JSON for display", e);
             return null;
         }
+    }
+
+    /** 从 aiResult.entities 中提取实体名称作为标签 */
+    @SuppressWarnings("unchecked")
+    private List<String> extractTags(Map<String, Object> aiResult) {
+        if (aiResult == null) return Collections.emptyList();
+        try {
+            Object entitiesObj = aiResult.get("entities");
+            if (entitiesObj instanceof Map) {
+                Map<String, Object> entitiesMap = (Map<String, Object>) entitiesObj;
+                Object items = entitiesMap.get("items");
+                if (items instanceof List) {
+                    return ((List<Map<String, Object>>) items).stream()
+                            .filter(e -> e.containsKey("name") && e.get("name") != null)
+                            .map(e -> e.get("name").toString())
+                            .limit(8) // 最多8个标签，避免卡片太挤
+                            .collect(Collectors.toList());
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Failed to extract tags from aiResult", e);
+        }
+        return Collections.emptyList();
     }
 }
