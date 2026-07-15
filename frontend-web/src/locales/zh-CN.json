@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "home": "首页",
+    "search": "搜索",
+    "login": "登录",
+    "register": "注册",
+    "profile": "个人中心",
+    "favorites": "我的收藏",
+    "subscriptions": "我的订阅",
+    "logout": "退出登录"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "出错了",
+    "empty": "暂无数据",
+    "confirm": "确认",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "back": "返回",
+    "more": "查看更多",
+    "refresh": "刷新",
+    "close": "关闭"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "email": "邮箱",
+    "password": "密码",
+    "nickname": "昵称",
+    "loginSuccess": "登录成功",
+    "registerSuccess": "注册成功",
+    "noAccount": "还没有账号？去注册",
+    "hasAccount": "已有账号？去登录"
+  },
+  "news": {
+    "hot": "今日热点",
+    "domestic": "国内",
+    "international": "国际",
+    "aiTech": "AI科技",
+    "finance": "财经",
+    "myFeed": "我的关注",
+    "summary": "AI摘要",
+    "facts": "核心事实",
+    "background": "事件背景",
+    "impact": "影响分析",
+    "related": "相关新闻",
+    "source": "来源",
+    "viewOriginal": "查看原文",
+    "favorite": "收藏",
+    "unfavorite": "取消收藏",
+    "publishTime": "发布时间",
+    "hotScore": "热度",
+    "readCount": "阅读"
+  },
+  "search": {
+    "placeholder": "搜索新闻、人物、公司...",
+    "advanced": "高级搜索",
+    "noResults": "未找到相关结果",
+    "results": "搜索结果",
+    "filter": "筛选",
+    "category": "分类",
+    "dateRange": "时间范围",
+    "source": "来源"
+  },
+  "user": {
+    "profile": "个人信息",
+    "settings": "设置",
+    "language": "语言",
+    "theme": "主题",
+    "lightMode": "浅色模式",
+    "darkMode": "深色模式"
+  },
+  "subscribe": {
+    "title": "我的订阅",
+    "add": "添加订阅",
+    "type": "类型",
+    "target": "订阅目标",
+    "tag": "标签",
+    "entity": "实体",
+    "category": "分类",
+    "company": "公司"
+  }
+}

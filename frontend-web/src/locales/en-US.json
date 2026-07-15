@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "home": "Home",
+    "search": "Search",
+    "login": "Log In",
+    "register": "Sign Up",
+    "profile": "Profile",
+    "favorites": "Favorites",
+    "subscriptions": "Subscriptions",
+    "logout": "Log Out"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "empty": "No data",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "more": "View More",
+    "refresh": "Refresh",
+    "close": "Close"
+  },
+  "auth": {
+    "login": "Log In",
+    "register": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "nickname": "Nickname",
+    "loginSuccess": "Login successful",
+    "registerSuccess": "Registration successful",
+    "noAccount": "Don't have an account? Sign up",
+    "hasAccount": "Already have an account? Log in"
+  },
+  "news": {
+    "hot": "Hot Topics",
+    "domestic": "Domestic",
+    "international": "International",
+    "aiTech": "AI & Tech",
+    "finance": "Finance",
+    "myFeed": "My Feed",
+    "summary": "AI Summary",
+    "facts": "Key Facts",
+    "background": "Background",
+    "impact": "Impact Analysis",
+    "related": "Related News",
+    "source": "Source",
+    "viewOriginal": "View Original",
+    "favorite": "Favorite",
+    "unfavorite": "Unfavorite",
+    "publishTime": "Published",
+    "hotScore": "Hot Score",
+    "readCount": "Views"
+  },
+  "search": {
+    "placeholder": "Search news, people, companies...",
+    "advanced": "Advanced Search",
+    "noResults": "No results found",
+    "results": "Search Results",
+    "filter": "Filter",
+    "category": "Category",
+    "dateRange": "Date Range",
+    "source": "Source"
+  },
+  "user": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode"
+  },
+  "subscribe": {
+    "title": "My Subscriptions",
+    "add": "Add Subscription",
+    "type": "Type",
+    "target": "Target",
+    "tag": "Tag",
+    "entity": "Entity",
+    "category": "Category",
+    "company": "Company"
+  }
+}
