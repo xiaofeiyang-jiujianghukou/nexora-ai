@@ -1,0 +1,2 @@
+- [Session Handoff](session-handoff.md) — 下个会话从 P1 消息流水线开始（2026-07-15）
+- [Doc Sync Rule](doc-sync-rule.md) — 会话关闭前必须同步所有关联文档

@@ -105,3 +105,33 @@ cd nexora-app && mvn spring-boot:run -Dspring-boot.run.profiles=dev
 # 3. 启动前端
 cd frontend-web && pnpm install && pnpm run dev
 ```
+
+## 当前进度快照 (2026-07-15)
+
+> **详细任务清单见** `docs/TODO.md`
+
+### 已完成
+- ✅ Sprint 0~6：项目骨架、用户、新闻、采集、AI、搜索、Feed+订阅
+- ✅ P0：LLM_API_KEY 已配置 / 种子数据已灌入（4 用户 8 文章） / 39 测试全过
+- ✅ 中间件全部运行（MySQL / Redis / ES / RocketMQ / Nacos / MinIO）
+
+### 🔜 下个会话：P1 — 消息流水线对接
+
+按推荐顺序执行：
+1. **RocketMQ Topic 创建**（3 个 Topic）
+2. **AI Consumer 对接 MQ**（消费 → 自动 AI 分析）
+3. **XXL-JOB 调度中心部署**（定时采集）
+4. **RSS 源 URL 配置**（端到端验证）
+5. **ES IK 分词器 + Mapping**（搜索升级）
+
+### 关键环境信息
+| 项 | 值 |
+|----|----|
+| LLM_API_KEY | 已设为全局环境变量 ✅ |
+| MySQL | `nexora-mysql` 容器运行中，端口 3306 |
+| 数据库 | `nexora`，18 张表（Flyway 管理） |
+| 测试 | 39 tests / 0 failures |
+| 前端测试 | Playwright E2E 4 个全部通过 |
+
+### 会话关闭前必做
+在结束会话前，需要更新所有相关文档（TODO.md / CLAUDE.md / memory/），并明确记录下个会话的起点。

@@ -1,6 +1,6 @@
 # Nexora AI — 开发日志
 
-> 最后更新：2026-07-15  
+> 最后更新：2026-07-15 (evening)    
 > GitHub：https://github.com/xiaofeiyang-jiujianghukou/nexora-ai.git
 
 ---
@@ -89,23 +89,32 @@ cd frontend-web && npm install && npm run dev
 
 ## 📋 接下来要做
 
-### P0 — 立即可做
+### P0 — 立即可做 ✅ (已完成)
 
-| 事项 | 说明 |
-|------|------|
-| **设置 LLM_API_KEY** | `$env:LLM_API_KEY="sk-..."` 然后重启后端，AI 摘要/分类/实体识别自动启用 |
-| **插入测试数据** | `Get-Content deploy\seed-data.sql -Raw \| docker exec -i nexora-mysql mysql -uroot -proot --default-character-set=utf8mb4 nexora` |
-| **运行全量测试** | `cd backend && mvn test` + `cd frontend-web && npx playwright test` |
+| 事项 | 说明 | 状态 |
+|------|------|------|
+| **设置 LLM_API_KEY** | `$env:LLM_API_KEY` 已配置为全局环境变量 | ✅ |
+| **插入测试数据** | 已验证：4 用户 / 8 文章 / 5 来源 / 7 分类 | ✅ |
+| **运行全量测试** | 后端 35 + E2E 4 = 39 tests，0 failures | ✅ |
+
+## 🔜 下个会话从这里开始 → P1
 
 ### P1 — 需要额外配置
 
-| 事项 | 依赖 |
-|------|------|
-| **RocketMQ Topic 创建** | `nexora-news-collected` / `nexora-news-ai-task` / `nexora-news-index-task` |
-| **XXL-JOB 调度中心部署** | 用于定时 RSS 采集 |
-| **ES IK 分词器 + Mapping** | 切换搜索为 Elasticsearch |
-| **RSS 源 URL 配置** | 在 `news_collection_source` 表录入真实 RSS 地址 |
-| **AI Consumer 对接 MQ** | 消费 `news-ai-task` → 自动 AI 分析 |
+**推荐执行顺序：**
+1. RocketMQ Topic 创建（打通消息流水线的前提）
+2. AI Consumer 对接 MQ（消费 Topic → 自动 AI 分析）
+3. XXL-JOB 调度中心部署（定时 RSS 采集）
+4. RSS 源 URL 配置（录入真实 RSS 地址后即可端到端跑通）
+5. ES IK 分词器 + Mapping（搜索升级，可并行）
+
+| # | 事项 | 依赖 | 详细说明 |
+|---|------|------|----------|
+| 1 | **RocketMQ Topic 创建** | Docker 中间件已运行 | 需创建 3 个 Topic：`nexora-news-collected` / `nexora-news-ai-task` / `nexora-news-index-task` |
+| 2 | **AI Consumer 对接 MQ** | 依赖 #1 | 消费 `nexora-news-ai-task` → 自动 AI 分析（摘要/分类/实体识别），利用已配置的 LLM_API_KEY |
+| 3 | **XXL-JOB 调度中心部署** | Docker 部署 | 用于定时 RSS 采集调度 |
+| 4 | **RSS 源 URL 配置** | 依赖 #1 | 在 `news_source` 表录入真实 RSS 地址，端到端验证采集→AI→索引流水线 |
+| 5 | **ES IK 分词器 + Mapping** | ES 容器已运行 | 创建中文分词索引，搜索从 MySQL LIKE 切换为 Elasticsearch |
 
 ### P2 — 前端增强
 
