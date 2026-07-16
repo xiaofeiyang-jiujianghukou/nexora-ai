@@ -1,0 +1,107 @@
+{
+  "title": "Nexora — Spring Boot Overview",
+  "uid": "nexora-spring-boot",
+  "tags": ["nexora", "spring-boot", "jvm"],
+  "refresh": "30s",
+  "panels": [
+    {
+      "title": "CPU Usage",
+      "type": "stat",
+      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 4},
+      "targets": [
+        {
+          "expr": "system_cpu_usage{job=\"nexora-backend\"} * 100",
+          "legendFormat": "CPU %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {"unit": "percent", "color": {"mode": "thresholds"}, "thresholds": {"steps": [{"value": 50, "color": "green"}, {"value": 80, "color": "orange"}, {"value": 90, "color": "red"}]}}
+      }
+    },
+    {
+      "title": "JVM Memory (MB)",
+      "type": "stat",
+      "gridPos": {"x": 8, "y": 0, "w": 8, "h": 4},
+      "targets": [
+        {"expr": "jvm_memory_used_bytes{job=\"nexora-backend\", area=\"heap\"} / 1048576", "legendFormat": "Heap Used"}
+      ],
+      "fieldConfig": {
+        "defaults": {"unit": "short", "color": {"mode": "thresholds"}}
+      }
+    },
+    {
+      "title": "GC Pause Time (ms)",
+      "type": "stat",
+      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 4},
+      "targets": [
+        {"expr": "rate(jvm_gc_pause_seconds_sum{job=\"nexora-backend\"}[1m]) * 1000"},
+        "legendFormat": "GC"
+      ],
+      "fieldConfig": {
+        "defaults": {"unit": "short"}
+      }
+    },
+    {
+      "title": "HTTP Requests / sec",
+      "type": "timeseries",
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count{job=\"nexora-backend\"}[1m])",
+          "legendFormat": "{{uri}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {"unit": "short"}
+      }
+    },
+    {
+      "title": "HTTP Response Time (ms)",
+      "type": "timeseries",
+      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_sum{job=\"nexora-backend\"}[1m]) / rate(http_server_requests_seconds_count{job=\"nexora-backend\"}[1m]) * 1000",
+          "legendFormat": "{{uri}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {"unit": "short"}
+      }
+    },
+    {
+      "title": "DB Connections",
+      "type": "timeseries",
+      "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "hikaricp_connections_active{job=\"nexora-backend\"}",
+          "legendFormat": "Active"
+        },
+        {
+          "expr": "hikaricp_connections_idle{job=\"nexora-backend\"}",
+          "legendFormat": "Idle"
+        },
+        {
+          "expr": "hikaricp_connections_pending{job=\"nexora-backend\"}",
+          "legendFormat": "Pending"
+        }
+      ]
+    },
+    {
+      "title": "JVM Threads",
+      "type": "timeseries",
+      "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "jvm_threads_live_threads{job=\"nexora-backend\"}",
+          "legendFormat": "Live"
+        },
+        {
+          "expr": "jvm_threads_daemon_threads{job=\"nexora-backend\"}",
+          "legendFormat": "Daemon"
+        }
+      ]
+    }
+  ]
+}

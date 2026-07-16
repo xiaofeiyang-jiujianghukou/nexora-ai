@@ -1,0 +1,78 @@
+# ============================================================
+# Production Profile — 生产环境配置
+# 通过环境变量注入敏感信息，K3s ConfigMap/Secret 管理
+# ============================================================
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://nexora-mysql:3306/nexora?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 50
+      idle-timeout: 300000
+      max-lifetime: 1200000
+
+  data:
+    redis:
+      host: ${REDIS_HOST:nexora-redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 16
+          min-idle: 4
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+rocketmq:
+  name-server: ${ROCKETMQ_NAMESRV:nexora-rmq-namesrv:9876}
+  producer:
+    group: nexora-producer-group
+
+nexora:
+  elasticsearch:
+    enabled: ${ES_ENABLED:true}
+
+llm:
+  api-key: ${LLM_API_KEY:}
+  base-url: ${LLM_BASE_URL:https://api.deepseek.com}
+  model: ${LLM_MODEL:deepseek-v4-pro}
+
+logging:
+  level:
+    com.nexora: INFO
+    org.springframework: WARN
+    com.baomidou.mybatisplus: WARN
+  pattern:
+    console: "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] [%level] [%logger{50}] - %msg%n"

@@ -104,3 +104,29 @@ jobs:
           name: nexora-build
           path: artifacts/
           retention-days: 7
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set Docker tags
+        id: tags
+        run: |
+          REPO="ghcr.io/${{ github.repository_owner }}/nexora-app"
+          echo "repo=$REPO" >> $env:GITHUB_OUTPUT
+          echo "sha_tag=$REPO:${{ github.sha }}" >> $env:GITHUB_OUTPUT
+          echo "latest_tag=$REPO:latest" >> $env:GITHUB_OUTPUT
+
+      - name: Build & Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          push: true
+          tags: |
+            ${{ steps.tags.outputs.sha_tag }}
+            ${{ steps.tags.outputs.latest_tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
