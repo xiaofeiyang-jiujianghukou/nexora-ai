@@ -70,13 +70,36 @@ cd frontend-web && npx playwright test
 
 ## 下个会话起点
 
-### P3 DevOps
-- CI/CD 流水线（GitHub Actions：compile → test → e2e → build）
-- 生产环境配置 application-prod.yml
-- Prometheus + Grafana 监控大盘
-- Flutter APP 初始化
+### 首选：CI/CD 流水线（GitHub Actions）
+
+当前项目零 CI，每次手动 `mvn clean install && npm run build`。下个会话直接搭建：
+
+**流水线步骤：**
+1. `compile` — Java 21 + Maven cache，`mvn clean install -DskipTests`
+2. `test` — 启动中间件 services，`mvn verify`（35 tests）
+3. `e2e` — Playwright + 前端 dev server，`npx playwright test`
+4. `build` — 前端 `npm run build` + 后端 Docker 镜像
+
+**关键文件：**
+- `.github/workflows/ci.yml`（新建）
+- 复用现有 `deploy/docker-compose-dev.yml` 启动测试中间件
+
+**启动命令（下次直接执行）：**
+```bash
+mkdir -p .github/workflows
+# 编写 ci.yml → commit → push → 看 GitHub Actions 运行
 ```
 
+### 备选：生产环境配置
+
+- `application-prod.yml`：MySQL/Redis/ES/RocketMQ 生产连接参数
+- Dockerfile 多阶段构建
+- K3s 部署清单 `deploy/k3s/`
+
+### 后续队列
+- Flutter APP 初始化
+- Prometheus + Grafana 监控大盘
+- E2E 测试补齐（收藏流程、推荐卡片验证）
 ---
 
 ## 架构速览
