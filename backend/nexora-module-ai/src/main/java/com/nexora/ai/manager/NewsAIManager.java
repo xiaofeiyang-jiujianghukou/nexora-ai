@@ -31,13 +31,8 @@ public class NewsAIManager {
     /** 目标分析语言（按需添加，aiResult key = langCode） */
     private record LangDef(String langCode, String langName, String systemPrompt) {}
     private static final List<LangDef> TARGET_LANGUAGES = List.of(
-            new LangDef("zh", "中文", "你是一名新闻编辑。只输出JSON，不要markdown代码块。"),
-            new LangDef("en", "English", "You are a news editor. Output ONLY JSON, no markdown."),
-            new LangDef("ja", "日本語", "あなたはニュース編集者です。JSONのみを出力し、マークダウンは使わないでください。"),
-            new LangDef("ko", "한국어", "당신은 뉴스 편집자입니다. JSON만 출력하고 마크다운은 사용하지 마세요."),
-            new LangDef("fr", "Français", "Vous êtes un éditeur de presse. Sortie JSON uniquement, pas de markdown."),
-            new LangDef("de", "Deutsch", "Sie sind Nachrichtenredakteur. Nur JSON ausgeben, kein Markdown."),
-            new LangDef("ru", "Русский", "Вы редактор новостей. Выводите только JSON, без markdown.")
+            new LangDef("zh", "中文", "你是一名中文新闻编辑。所有内容必须用中文输出。只输出JSON，不要markdown代码块。"),
+            new LangDef("en", "English", "You are an English news editor. ALL content MUST be in English. Output ONLY JSON, no markdown.")
     );
 
     public Map<String, Object> analyze(String title, String content) {
@@ -83,6 +78,32 @@ public class NewsAIManager {
                 .toList(), result.get("category"));
 
         return result;
+    }
+
+    /**
+     * 仅对指定语言进行 AI 分析（增量新增语言时使用）。
+     * 返回与 analyze() 中语言 section 一致的 {title, summary, facts, background, impact} 结构。
+     */
+    public Map<String, Object> analyzeForLang(String title, String content, String langCode) {
+        LangDef lang = TARGET_LANGUAGES.stream()
+                .filter(l -> l.langCode().equals(langCode))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unsupported language: " + langCode));
+
+        log.info("增量AI分析 [{}]: title={}", langCode,
+                title != null && title.length() > 60 ? title.substring(0, 60) : title);
+
+        String prompt = buildLangPrompt(lang, title, content != null ? content : "");
+        String aiResult = llmProvider.chat(lang.systemPrompt, prompt);
+        Map<String, Object> section = parseJsonSafe(aiResult);
+        if (section == null) section = new LinkedHashMap<>();
+        if (!section.containsKey("title") || section.get("title") == null
+                || section.get("title").toString().isBlank()) {
+            section.put("title", title != null ? title : "");
+        }
+        log.info("增量AI [{}] 完成: summary={}chars", langCode,
+                section.getOrDefault("summary", "").toString().length());
+        return section;
     }
 
     /** 为目标语言构建分析 prompt — 所有语言走同一个模板，language 参数驱动 LLM 输出语言 */

@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.nexora.common.response.PageResult;
 import com.nexora.common.utils.JsonUtils;
 import com.nexora.news.entity.NewsArticleDO;
+import com.nexora.news.entity.NewsArticleI18nDO;
+import com.nexora.news.mapper.NewsArticleI18nMapper;
 import com.nexora.news.mapper.NewsArticleMapper;
 import com.nexora.news.mapper.NewsCategoryMapper;
 import com.nexora.news.mapper.NewsSourceMapper;
@@ -14,9 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 public class SearchServiceImpl implements SearchService {
 
     private final NewsArticleMapper newsArticleMapper;
+    private final NewsArticleI18nMapper i18nMapper;
     private final NewsSourceMapper sourceMapper;
     private final NewsCategoryMapper categoryMapper;
 
@@ -47,6 +48,11 @@ public class SearchServiceImpl implements SearchService {
 
         Page<NewsArticleDO> pageResult = newsArticleMapper.selectPage(new Page<>(page, size), wrapper);
 
+        // 批量加载 i18n 内容
+        List<Long> articleIds = pageResult.getRecords().stream()
+                .map(NewsArticleDO::getId).toList();
+        Map<Long, Map<String, Object>> aiResultByArticleId = batchLoadI18n(articleIds);
+
         List<NewsSummaryVO> list = pageResult.getRecords().stream()
                 .map(a -> {
                     String src = null;
@@ -60,13 +66,13 @@ public class SearchServiceImpl implements SearchService {
                         var c = categoryMapper.selectById(a.getCategoryId());
                         if (c != null) { catName = c.getName(); catCode = c.getCode(); }
                     }
-                    Map<String, Object> aiResult = parseAiResult(a.getAiResult());
+                    Map<String, Object> aiResult = aiResultByArticleId.getOrDefault(a.getId(), Collections.emptyMap());
                     return NewsSummaryVO.builder()
                             .id(a.getId()).title(a.getTitle()).summary(a.getSummary())
                             .sourceName(src).categoryName(catName).categoryCode(catCode)
                             .hotScore(a.getHotScore()).viewCount(a.getViewCount())
                             .tags(extractTags(aiResult))
-                            .aiResult(aiResult)
+                            .aiResult(aiResult.isEmpty() ? null : aiResult)
                             .publishTime(a.getPublishTime()).build();
                 })
                 .collect(Collectors.toList());
@@ -74,16 +80,35 @@ public class SearchServiceImpl implements SearchService {
         return PageResult.of(list, pageResult.getTotal(), page, size);
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> parseAiResult(String aiResultJson) {
-        if (aiResultJson == null || aiResultJson.isBlank()) {
-            return null;
+    /** 批量加载文章的多语言 AI 内容 */
+    private Map<Long, Map<String, Object>> batchLoadI18n(List<Long> articleIds) {
+        if (articleIds.isEmpty()) return Collections.emptyMap();
+
+        List<NewsArticleI18nDO> rows = i18nMapper.selectList(
+                new LambdaQueryWrapper<NewsArticleI18nDO>()
+                        .in(NewsArticleI18nDO::getArticleId, articleIds));
+
+        Map<Long, Map<String, Object>> result = new HashMap<>();
+        for (NewsArticleI18nDO row : rows) {
+            Map<String, Object> aiResult = result.computeIfAbsent(row.getArticleId(), k -> new LinkedHashMap<>());
+            Map<String, Object> section = new LinkedHashMap<>();
+            section.put("title", row.getTitle());
+            section.put("summary", row.getSummary());
+            section.put("facts", parseFactsJson(row.getFacts()));
+            section.put("background", row.getBackground());
+            section.put("impact", row.getImpact());
+            aiResult.put(row.getLangCode(), section);
         }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> parseFactsJson(String factsJson) {
+        if (factsJson == null || factsJson.isBlank()) return List.of();
         try {
-            return JsonUtils.fromJson(aiResultJson, Map.class);
+            return JsonUtils.fromJson(factsJson, List.class);
         } catch (Exception e) {
-            log.warn("Failed to parse aiResult JSON for search display", e);
-            return null;
+            return List.of();
         }
     }
 

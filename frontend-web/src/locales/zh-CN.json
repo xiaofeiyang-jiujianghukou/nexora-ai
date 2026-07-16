@@ -108,6 +108,10 @@
     "society": "社会",
     "sports": "体育"
   },
+  "home": {
+    "forYou": "为你推荐",
+    "basedOnInterests": "基于你的兴趣推荐"
+  },
   "page": {
     "home": "首页",
     "newsDetail": "新闻详情",

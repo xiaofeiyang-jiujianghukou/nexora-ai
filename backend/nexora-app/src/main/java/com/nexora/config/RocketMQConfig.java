@@ -30,7 +30,8 @@ public class RocketMQConfig {
         List<String> topics = List.of(
                 MQTopics.NEWS_COLLECTED,
                 MQTopics.NEWS_AI_TASK,
-                MQTopics.NEWS_INDEX_TASK
+                MQTopics.NEWS_INDEX_TASK,
+                MQTopics.LANG_BACKFILL
         );
 
         try {

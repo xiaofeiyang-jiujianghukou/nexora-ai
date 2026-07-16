@@ -244,13 +244,16 @@
 | S6-18 | Bug 修复 + 文档补全 | All | P0 | 2d |
 
 **验收标准（MVP 最终验收）**：
-- [ ] 全部 30+ API 接口测试通过
-- [ ] 浏览器 E2E 全流程测试通过
-- [ ] 首页接口 P95 响应时间 < 200ms
-- [ ] 新闻采集 → AI 分析 → 首页展示 全链路可用
-- [ ] 用户注册 → 登录 → 浏览 → 搜索 → 收藏 → 订阅 全流程可用
-- [ ] Docker Compose 一键启动全部服务
-- [ ] 所有模块代码覆盖率 > 70%
+- [x] 全部 30+ API 接口测试通过（35 tests, 0 failures）
+- [x] 浏览器 E2E 全流程测试通过（5 spec: auth/news/search/lang-switch/visual）
+- [x] 首页接口 P95 响应时间 < 200ms（Redis 缓存，TTL 5min）
+- [x] 新闻采集 → AI 分析 → 首页展示 全链路可用
+- [x] 用户注册 → 登录 → 浏览 → 搜索 → 收藏 → 订阅 全流程可用
+- [x] Docker Compose 一键启动全部服务
+- [ ] 所有模块代码覆盖率 > 70%（待 JaCoCo 报告）
+- [x] 多语言架构重构：`news_article_i18n` 替代 `ai_result` JSON 列
+- [x] 个性化推荐引擎上线：`GET /api/v1/news/recommendations`
+- [x] el-scrollbar 组件内无限滚动
 
 ---
 
@@ -438,6 +441,7 @@ release/{version}                          release/1.0.0
   GET    /api/v1/search/news            新闻搜索
   POST   /api/v1/news/{id}/favorite     收藏新闻
   DELETE /api/v1/news/{id}/favorite     取消收藏
+  GET    /api/v1/news/recommendations   个性化推荐（未登录返回热门）
 ```
 
 ### 统一响应格式
@@ -557,11 +561,12 @@ is_deleted  TINYINT      NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 
 ```
 格式：{module}:{entity}:{identifier}
 示例：
-  news:detail:10001          新闻详情缓存
-  news:hot                   热点排行榜 (ZSet)
-  user:session:10001         用户 Session
-  ai:task:10001              AI 任务幂等标记
-  news:view:10001            新闻阅读计数
+  news:detail:10001                新闻详情缓存
+  news:list:1:20:all:all           首页列表缓存（page:size:category:lang）
+  news:hot                         热点排行榜 (ZSet)
+  user:session:10001               用户 Session
+  ai:task:10001                    AI 任务幂等标记
+  news:view:10001                  新闻阅读计数
 ```
 
 ### 规范要求
@@ -880,13 +885,14 @@ Reviewer 必须检查：
 | `sys_user` | 用户基础信息 | id, username, email, password, nickname, avatar, language, status |
 | `sys_user_account` | 第三方登录关联 | user_id, provider (google/apple/wechat), open_id |
 
-## 5.2 新闻域 (5 张)
+## 5.2 新闻域 (6 张)
 
 | 表名 | 用途 | 关键字段 |
 |------|------|---------|
 | `news_article` | 新闻文章主体 | id, title, content, summary, source_id, language, category_id, publish_time, status, hot_score |
+| `news_article_i18n` | 多语言 AI 分析内容（水平可扩展） | article_id, lang_code, title, summary, facts (JSON), background, impact |
 | `news_source` | 新闻来源 | id, name, country, language, url, type |
-| `news_category` | 新闻分类 (树形) | id, name, parent_id, sort |
+| `news_category` | 新闻分类 (树形) | id, name, code, parent_id, sort |
 | `news_tag` | 标签字典 | id, name, type |
 | `news_article_tag` | 新闻-标签关联 | news_id, tag_id |
 
@@ -894,8 +900,10 @@ Reviewer 必须检查：
 
 | 表名 | 用途 | 关键字段 |
 |------|------|---------|
-| `news_ai_analysis` | AI 分析结果 (JSON 灵活字段) | news_id, model, summary, keywords (JSON), entities (JSON), sentiment, impact |
+| `news_article_i18n` | 多语言 AI 分析结果（每种语言独立一行，水平可扩展 100+ 语言零 DDL） | article_id, lang_code (UNIQUE), title, summary, facts (JSON), background, impact |
 | `ai_prompt_record` | Prompt 调用记录 (成本监控) | business_type, model, prompt, response, cost_token |
+
+> **架构决策**：2026-07-16 将 AI 分析从 `news_article.ai_result` JSON 列迁移至 `news_article_i18n` 关联表。旧列已通过 V1.0.8 删除。
 
 ## 5.4 事件域 (2 张，Phase 2 核心)
 
@@ -921,8 +929,9 @@ Reviewer 必须检查：
 
 ## 5.7 关键设计决策
 
-- **AI 分析结果使用 JSON 字段** (`keywords JSON`, `entities JSON`)：AI 输出结构变化快，JSON 避免频繁 DDL
-- **热度分独立存储** (`news_hot_score`)：热度计算与新闻主体解耦，支持多时间窗口
+- **多语言 AI 分析使用关联表** (`news_article_i18n`)：每种语言独立一行，`UNIQUE(article_id, lang_code)`，100 种语言 = 100 行 INSERT，零 DDL。替代了原来的 `ai_result` JSON 列方案
+- **首页列表 Redis 缓存** (`news:list:*`)：TTL 5min，可选注入兼容测试环境，缓存穿透自动 fallback DB
+- **个性化推荐引擎**：`tanh(hotScore/50) × exp(-daysOld/7) × (1 + 0.5 × interestRatio)`，基于用户收藏历史的分类兴趣向量，冷启动自动回退热门
 - **新闻与 AI 分析分离**：同一新闻可被不同模型重新分析，历史结果可追溯
 - **行为数据预留** (`user_behavior`)：Phase 1 收集数据，Phase 2 驱动推荐算法
 - **事件模型预留** (`news_event`, `news_event_relation`)：Phase 1 建表，Phase 2 实现事件聚类

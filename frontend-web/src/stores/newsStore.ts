@@ -37,6 +37,8 @@ export interface Category {
 
 export const useNewsStore = defineStore('news', () => {
   const hotList = ref<NewsItem[]>([]);
+  const recommendations = ref<NewsItem[]>([]);
+  const recommendationsLoading = ref(false);
   const categories = ref<Category[]>([]);
   const loading = ref(false);
   const loadingMore = ref(false);
@@ -91,6 +93,20 @@ export const useNewsStore = defineStore('news', () => {
     return res.data || [];
   }
 
-  return { hotList, categories, loading, loadingMore, currentPage, hasMore,
-    fetchHotList, loadMore, fetchCategories, getDetail, getRelated };
+  async function fetchRecommendations(limit = 10) {
+    recommendationsLoading.value = true;
+    try {
+      const res = await http.get('/api/v1/news/recommendations', {
+        params: { limit },
+      });
+      recommendations.value = res.data || [];
+    } finally {
+      recommendationsLoading.value = false;
+    }
+  }
+
+  return { hotList, recommendations, recommendationsLoading, categories,
+    loading, loadingMore, currentPage, hasMore,
+    fetchHotList, loadMore, fetchCategories, getDetail, getRelated,
+    fetchRecommendations };
 });

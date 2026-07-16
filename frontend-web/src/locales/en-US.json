@@ -108,6 +108,10 @@
     "society": "Society",
     "sports": "Sports"
   },
+  "home": {
+    "forYou": "For You",
+    "basedOnInterests": "Based on your interests"
+  },
   "page": {
     "home": "Home",
     "newsDetail": "News Detail",

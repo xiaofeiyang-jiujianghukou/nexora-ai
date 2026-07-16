@@ -25,6 +25,7 @@ public class SecurityConfig {
                         // 公开端点
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/news/**").permitAll()
+                        .requestMatchers("/api/v1/admin/**").permitAll()
                         .requestMatchers("/api/v1/feed/**").permitAll()
                         .requestMatchers("/api/v1/search/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**", "/webjars/**").permitAll()

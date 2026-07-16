@@ -22,7 +22,6 @@ CREATE TABLE IF NOT EXISTS news_article
     title        VARCHAR(512) NOT NULL,
     content      CLOB,
     summary      CLOB,
-    ai_result    CLOB,
     source_id    BIGINT,
     source_url   VARCHAR(1024),
     language     VARCHAR(16)  NOT NULL DEFAULT 'zh-CN',
@@ -90,3 +89,18 @@ CREATE TABLE IF NOT EXISTS user_subscription
     target       VARCHAR(128) NOT NULL,
     created_time TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS news_article_i18n
+(
+    id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    article_id   BIGINT       NOT NULL,
+    lang_code    VARCHAR(16)  NOT NULL,
+    title        VARCHAR(512),
+    summary      CLOB,
+    facts        CLOB,
+    background   CLOB,
+    impact       CLOB,
+    created_time TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_time TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uk_article_lang ON news_article_i18n(article_id, lang_code);

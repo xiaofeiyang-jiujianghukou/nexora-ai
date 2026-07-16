@@ -17,6 +17,9 @@ public interface MQTopics {
     /** 事件聚合任务 */
     String NEWS_EVENT_TASK = "nexora-news-event-task";
 
+    /** 语言增量回填任务 */
+    String LANG_BACKFILL = "nexora-news-lang-backfill";
+
     /** 用户通知 */
     String USER_NOTIFICATION = "nexora-user-notification";
 }

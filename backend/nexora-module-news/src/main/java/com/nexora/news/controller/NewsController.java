@@ -9,6 +9,7 @@ import com.nexora.news.vo.NewsSummaryVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +35,8 @@ public class NewsController {
     @GetMapping("/{id}")
     @Operation(summary = "新闻详情")
     public Result<NewsDetailVO> detail(@PathVariable Long id) {
-        return Result.success(newsService.getDetail(id));
+        Long userId = getCurrentUserIdOrNull();
+        return Result.success(newsService.getDetail(id, userId));
     }
 
     @GetMapping("/{id}/related")
@@ -48,5 +50,25 @@ public class NewsController {
     @Operation(summary = "新闻分类列表")
     public Result<List<CategoryVO>> categories() {
         return Result.success(newsService.getCategories());
+    }
+
+    @GetMapping("/recommendations")
+    @Operation(summary = "个性化推荐 — 基于收藏历史的规则推荐（未登录/冷启动返回热门）")
+    public Result<List<NewsSummaryVO>> recommendations(
+            @RequestParam(name = "limit", defaultValue = "20") int limit) {
+        Long userId = getCurrentUserIdOrNull();
+        return Result.success(newsService.getRecommendations(userId, limit));
+    }
+
+    /** 获取当前登录用户 ID，未登录返回 null（允许匿名访问推荐） */
+    private Long getCurrentUserIdOrNull() {
+        try {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof Long) {
+                return (Long) auth.getPrincipal();
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 }

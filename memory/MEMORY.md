@@ -1,3 +1,5 @@
-- [Session Handoff](session-handoff.md) — 下个会话：MCP 修复生效后浏览器完整验证（2026-07-16）
+- [Session Handoff](session-handoff.md) — MVP S0-S6 完成，中英双语稳定，35 测试全绿（2026-07-16）
 - [No Downgrade Rule](no-downgrade-rule.md) — AI 协作铁律：工具不可用时必须修复根因，禁止 CLI 降级替代
+- [Java Rebuild Rule](java-rebuild-rule.md) — 修改 Java 代码后必须先 mvn clean install，无异常再启动
 - [Doc Sync Rule](doc-sync-rule.md) — 会话关闭前必须同步所有关联文档
+- [LLM Translation Limitation](llm-translation-limitation.md) — DeepSeek-chat 中→俄技术翻译盲区

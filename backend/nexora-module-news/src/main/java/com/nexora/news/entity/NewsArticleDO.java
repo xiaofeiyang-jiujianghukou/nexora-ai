@@ -21,8 +21,6 @@ public class NewsArticleDO {
 
     private String summary;
 
-    private String aiResult;
-
     private Long sourceId;
 
     private String sourceUrl;

@@ -9,7 +9,7 @@
 
 /** 所有支持的语言（顺序 = 下拉菜单顺序） */
 export const SUPPORTED_LOCALES = [
-  'zh-CN', 'en-US', 'ja-JP', 'ko-KR', 'fr-FR', 'de-DE', 'ru-RU',
+  'zh-CN', 'en-US',
 ] as const;
 
 /** 默认语言 */
@@ -22,11 +22,6 @@ export const FALLBACK_LOCALE = 'en-US';
 const DISPLAY_NAMES: Record<string, string> = {
   'zh-CN': '中文',
   'en-US': 'EN',
-  'ja-JP': '日本語',
-  'ko-KR': '한국어',
-  'fr-FR': 'Français',
-  'de-DE': 'Deutsch',
-  'ru-RU': 'Русский',
 };
 
 /**
@@ -63,20 +58,21 @@ export function isLangMissing(aiResult: Record<string, unknown> | null | undefin
 
 /**
  * 从 aiResult 获取当前语言的最佳内容
- * 回退链: 当前语言 → 任意可用语言 → null
+ * 回退链: 当前语言 → en（国际化通用回退） → null（显示原文标题）
  */
 export function getLocalizedContent<T = Record<string, unknown>>(
   aiResult: Record<string, unknown> | null | undefined,
   lang: string,
 ): T | null {
   if (!aiResult) return null;
-  // 精确匹配
-  if (aiResult[lang]) return aiResult[lang] as T;
-  // 回退到任意可用
-  for (const key of Object.keys(aiResult)) {
-    if (aiResult[key] && typeof aiResult[key] === 'object') {
-      return aiResult[key] as T;
-    }
+  // 1. 精确匹配
+  if (aiResult[lang] && typeof aiResult[lang] === 'object') {
+    return aiResult[lang] as T;
   }
+  // 2. 回退到英文（国际化通用回退，不做其他语言兜底）
+  if (lang !== 'en' && aiResult['en'] && typeof aiResult['en'] === 'object') {
+    return aiResult['en'] as T;
+  }
+  // 3. 无可用内容 → 由调用方使用原文 title
   return null;
 }

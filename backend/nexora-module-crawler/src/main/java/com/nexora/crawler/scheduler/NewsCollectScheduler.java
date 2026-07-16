@@ -7,6 +7,7 @@ import com.nexora.crawler.collector.RSSCollector;
 import com.nexora.crawler.pipeline.DuplicateDetector;
 import com.nexora.crawler.pipeline.QualityScorer;
 import com.nexora.crawler.producer.NewsCollectProducer;
+import com.nexora.news.cache.NewsCacheManager;
 import com.nexora.news.entity.NewsArticleDO;
 import com.nexora.news.entity.NewsSourceDO;
 import com.nexora.news.mapper.NewsArticleMapper;
@@ -38,6 +39,7 @@ public class NewsCollectScheduler {
     private final DuplicateDetector duplicateDetector;
     private final QualityScorer qualityScorer;
     private final NewsCollectProducer newsCollectProducer;
+    private final NewsCacheManager newsCacheManager;
 
     /**
      * 每 10 分钟执行一次 RSS 采集
@@ -102,6 +104,9 @@ public class NewsCollectScheduler {
                     articleMapper.insert(article);
 
                     totalNew++;
+
+                    // 缓存失效：新文章入库 → 清除所有列表缓存
+                    newsCacheManager.evictAll();
 
                     // 6. 发送 AI 分析任务到 MQ
                     try {

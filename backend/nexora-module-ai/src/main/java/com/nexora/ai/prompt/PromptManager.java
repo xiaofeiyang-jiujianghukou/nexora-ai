@@ -53,17 +53,17 @@ public class PromptManager {
     private String getDefaultPrompt(String name) {
         return switch (name) {
             case "news-summary" -> """
-                    Analyze the following news and output strict JSON in {{language}} (no markdown, no explanation):
+                    You MUST write ALL output in {{language}}. Do NOT use any other language.
+                    Analyze the following news and output strict JSON (no markdown, no explanation):
                     {
-                      "title": "Write a concise, accurate title in {{language}} (translate the original if needed)",
-                      "summary": "2-3 sentences summarizing the core content in {{language}} (80-120 words)",
-                      "facts": ["Key fact 1", "Key fact 2", "Key fact 3"],
-                      "background": "Relevant context and background in {{language}} (40-60 words)",
-                      "impact": "Potential impact of this event in {{language}} (40-60 words)"
+                      "title": "A concise, accurate title translated into {{language}}",
+                      "summary": "2-3 sentences in {{language}} summarizing the core content",
+                      "facts": ["Key fact 1 in {{language}}", "Key fact 2 in {{language}}", "Key fact 3 in {{language}}"],
+                      "background": "Relevant context in {{language}}",
+                      "impact": "Potential impact of this event in {{language}}"
                     }
 
-                    Example output:
-                    {"title":"Apple Unveils M4-Powered MacBook Pro with 24-Hour Battery Life","summary":"Apple unveiled its new MacBook Pro powered by the M4 chip, featuring significant performance gains and extended battery life.","facts":["M4 chip uses 2nm process","CPU 50% faster, GPU 80% faster","24-hour battery life"],"background":"This follows Apple's annual chip upgrade cycle since M3, continuing ARM architecture momentum.","impact":"Further solidifies Apple's lead in high-end laptops and pushes industry-wide ARM adoption."}
+                    ⚠️ IMPORTANT: Every single field value MUST be written in {{language}}. Never keep the original language.
 
                     Title: {{title}}
                     Content: {{content}}

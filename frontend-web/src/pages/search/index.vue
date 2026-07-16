@@ -29,7 +29,7 @@
       <el-empty v-else-if="searched" :description="$t('search.noResults')" />
       <div v-else class="search-hint">
         <el-icon :size="48" color="var(--text-placeholder)"><Search /></el-icon>
-        <p>输入关键词搜索新闻</p>
+        <p>{{ $t('search.hint') }}</p>
       </div>
     </div>
   </div>
