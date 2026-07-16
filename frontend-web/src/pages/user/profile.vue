@@ -37,7 +37,7 @@
             </div>
             <div class="info-item">
               <span class="info-label">{{ $t('user.language') }}</span>
-              <span class="info-value">{{ i18n.locale.value === 'zh-CN' ? '中文' : 'English' }}</span>
+              <span class="info-value">{{ localeDisplayName(i18n.locale.value) }}</span>
             </div>
           </div>
         </div>
@@ -88,12 +88,27 @@
             <div class="setting-info">
               <span class="setting-label">{{ $t('user.language') }}</span>
               <span class="setting-value">
-                {{ i18n.locale.value === 'zh-CN' ? '中文 (zh-CN)' : 'English (en-US)' }}
+                {{ localeDisplayName(i18n.locale.value) }} ({{ i18n.locale.value }})
               </span>
             </div>
-            <el-button size="small" @click="toggleLang">
-              {{ i18n.locale.value === 'zh-CN' ? 'Switch to English' : '切换到中文' }}
-            </el-button>
+            <el-dropdown trigger="click" @command="(loc: string) => switchLang(loc)">
+              <el-button size="small">
+                {{ $t('user.switchLanguage') }}
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    v-for="loc in SUPPORTED_LOCALES"
+                    :key="loc"
+                    :command="loc"
+                    :class="{ 'is-active': settingsStore.locale === loc }"
+                  >
+                    {{ localeDisplayName(loc) }} ({{ loc }})
+                    <span v-if="settingsStore.locale === loc"> ✓</span>
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
         </div>
       </el-card>
@@ -107,6 +122,7 @@ import { useI18n } from 'vue-i18n';
 import { Moon, Sunny, Edit } from '@element-plus/icons-vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { SUPPORTED_LOCALES, localeDisplayName } from '@/locales/config';
 import http from '@/utils/http';
 import type { FormInstance } from 'element-plus';
 
@@ -114,10 +130,9 @@ const i18n = useI18n();
 const authStore = useAuthStore();
 const settingsStore = useSettingsStore();
 
-function toggleLang() {
-  const newLocale = i18n.locale.value === 'zh-CN' ? 'en-US' : 'zh-CN';
-  i18n.locale.value = newLocale;
-  localStorage.setItem('nexora-locale', newLocale);
+function switchLang(loc: string) {
+  settingsStore.setLocale(loc);
+  i18n.locale.value = loc;
 }
 
 const editing = ref(false);

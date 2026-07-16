@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { DEFAULT_LOCALE, nextLocale } from '@/locales/config';
 
 export const useSettingsStore = defineStore('settings', () => {
   // ---- 主题 ----
@@ -18,8 +19,23 @@ export const useSettingsStore = defineStore('settings', () => {
     applyTheme();
   }
 
+  // ---- 语言（持久化到 localStorage，由 AppLayout 双向同步到 i18n） ----
+  const locale = ref<string>(
+    localStorage.getItem('nexora-locale') || DEFAULT_LOCALE
+  );
+
+  function setLocale(lang: string) {
+    locale.value = lang;
+    localStorage.setItem('nexora-locale', lang);
+  }
+
+  /** 切换到下一个支持的语言 */
+  function toggleLocale() {
+    setLocale(nextLocale(locale.value));
+  }
+
   // 启动时立即应用
   applyTheme();
 
-  return { theme, toggleTheme, applyTheme };
+  return { theme, toggleTheme, applyTheme, locale, setLocale, toggleLocale };
 });

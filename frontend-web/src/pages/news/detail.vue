@@ -80,6 +80,7 @@ import NewsCard from '@/components/common/NewsCard.vue';
 import { useNewsStore } from '@/stores/newsStore';
 import { useFavoriteStore } from '@/stores/favoriteStore';
 import { useAuthStore } from '@/stores/authStore';
+import { localeToLang, getLocalizedContent } from '@/locales/config';
 import type { NewsDetail } from '@/stores/newsStore';
 import type { NewsItem as NewsItemType } from '@/components/common/NewsCard.vue';
 
@@ -94,23 +95,19 @@ const related = ref<NewsItemType[]>([]);
 const loading = ref(false);
 const isFav = ref(false);
 
-/** 当前语言 key (zh / en)，用于从 aiResult 取对应语言内容 */
-const lang = computed(() => locale.value === 'en-US' ? 'en' : 'zh');
+/** 当前语言 key（'zh-CN' → 'zh', 'en-US' → 'en', 'ja-JP' → 'ja'） */
+const lang = computed(() => localeToLang(locale.value));
 
 /** 双语标题：优先取 aiResult[lang].title，回退到原始 title */
 const displayTitle = computed(() => {
-  const ai = detail.value?.aiResult;
-  if (ai) {
-    const localized = ai[lang.value] as Record<string, any> | undefined;
-    if (localized?.title) return localized.title as string;
-  }
+  const localized = getLocalizedContent<Record<string, any>>(detail.value?.aiResult, lang.value);
+  if (localized?.title) return localized.title as string;
   return detail.value?.title || '';
 });
 
 /** 根据当前语言从 aiResult 取 AI 分析内容 */
 const aiSection = computed(() => {
-  const ai = detail.value?.aiResult;
-  const localized = ai?.[lang.value] as Record<string, any> | undefined;
+  const localized = getLocalizedContent<Record<string, any>>(detail.value?.aiResult, lang.value);
   if (localized) {
     return {
       summary: (localized.summary as string) || detail.value?.aiAnalysis?.summary || detail.value?.summary || '',

@@ -59,10 +59,26 @@
             </el-button>
           </el-tooltip>
 
-          <!-- 语言切换 -->
-          <el-button class="lang-btn" text size="small" @click="toggleLang">
-            {{ i18n.locale.value === 'zh-CN' ? 'EN' : '中文' }}
-          </el-button>
+          <!-- 语言选择：下拉菜单列出所有支持的语言 -->
+          <el-dropdown trigger="click" @command="switchLang">
+            <el-button class="lang-btn" text size="small">
+              {{ localeDisplayName(settingsStore.locale) }}
+              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  v-for="loc in SUPPORTED_LOCALES"
+                  :key="loc"
+                  :command="loc"
+                  :class="{ 'is-active': settingsStore.locale === loc }"
+                >
+                  {{ localeDisplayName(loc) }}
+                  <span v-if="settingsStore.locale === loc" class="check-mark">✓</span>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
 
           <!-- 用户菜单 -->
           <template v-if="authStore.isAuthenticated">
@@ -91,17 +107,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Search, Moon, Sunny, Star, Bell } from '@element-plus/icons-vue';
+import { Search, Moon, Sunny, Star, Bell, ArrowDown } from '@element-plus/icons-vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { SUPPORTED_LOCALES, localeDisplayName } from '@/locales/config';
 
 const router = useRouter();
 const i18n = useI18n();
 const authStore = useAuthStore();
 const settingsStore = useSettingsStore();
+
+// 双向同步 locale：settingsStore ↔ i18n
+onMounted(() => {
+  if (i18n.locale.value !== settingsStore.locale) {
+    i18n.locale.value = settingsStore.locale;
+  }
+});
+// i18n 变化 → store（仅接受受支持的语言）
+watch(() => i18n.locale.value, (val) => {
+  if (val !== settingsStore.locale && SUPPORTED_LOCALES.includes(val as typeof SUPPORTED_LOCALES[number])) {
+    settingsStore.setLocale(val);
+  }
+});
+// store 变化 → i18n
+watch(() => settingsStore.locale, (val) => {
+  if (i18n.locale.value !== val) {
+    i18n.locale.value = val;
+  }
+});
 
 const searchQuery = ref('');
 
@@ -111,11 +147,10 @@ function goSearch() {
   }
 }
 
-/** 直接切换语言（不再通过 store 中转，保证响应式） */
-function toggleLang() {
-  const newLocale = i18n.locale.value === 'zh-CN' ? 'en-US' : 'zh-CN';
-  i18n.locale.value = newLocale;
-  localStorage.setItem('nexora-locale', newLocale);
+/** 切换语言（下拉菜单选择），通过 store 统一管理 */
+function switchLang(loc: string) {
+  settingsStore.setLocale(loc);
+  i18n.locale.value = loc;
 }
 </script>
 

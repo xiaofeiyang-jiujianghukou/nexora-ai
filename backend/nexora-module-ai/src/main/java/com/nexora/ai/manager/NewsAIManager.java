@@ -7,11 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * AI 分析编排器 — 生成多语言摘要 + 分类 + 实体识别。
- * 返回结构：{"zh":{...},"en":{...},"category":"...","subCategory":"...","entities":[...]}
+ * 返回结构：{"zh":{title,summary,facts,background,impact}, "en":{...}, ... , "category":"...","entities":[...]}
+ *
+ * 新增语言：在 TARGET_LANGUAGES 列表中添加条目即可。
  */
 @Slf4j
 @Component
@@ -25,74 +28,69 @@ public class NewsAIManager {
         this.promptManager = promptManager;
     }
 
+    /** 目标分析语言（按需添加，aiResult key = langCode） */
+    private record LangDef(String langCode, String langName, String systemPrompt) {}
+    private static final List<LangDef> TARGET_LANGUAGES = List.of(
+            new LangDef("zh", "中文", "你是一名新闻编辑。只输出JSON，不要markdown代码块。"),
+            new LangDef("en", "English", "You are a news editor. Output ONLY JSON, no markdown."),
+            new LangDef("ja", "日本語", "あなたはニュース編集者です。JSONのみを出力し、マークダウンは使わないでください。"),
+            new LangDef("ko", "한국어", "당신은 뉴스 편집자입니다. JSON만 출력하고 마크다운은 사용하지 마세요."),
+            new LangDef("fr", "Français", "Vous êtes un éditeur de presse. Sortie JSON uniquement, pas de markdown."),
+            new LangDef("de", "Deutsch", "Sie sind Nachrichtenredakteur. Nur JSON ausgeben, kein Markdown."),
+            new LangDef("ru", "Русский", "Вы редактор новостей. Выводите только JSON, без markdown.")
+    );
+
     public Map<String, Object> analyze(String title, String content) {
         log.info("开始AI分析: title={}", title.length() > 80 ? title.substring(0, 80) : title);
 
         String shortContent = content != null && content.length() > 1500
                 ? content.substring(0, 1500) : (content != null ? content : "");
 
-        // ---- 中文摘要 ----
-        String zhPrompt = promptManager.render("news-summary", Map.of("content", content != null ? content : ""));
-        String zhResult = llmProvider.chat("你是一名新闻编辑。只输出JSON，不要markdown代码块。", zhPrompt);
-        Map<String, Object> zh = parseJsonSafe(zhResult);
-
-        // ---- 英文摘要 ----
-        String enPrompt = buildEnglishPrompt(title, shortContent);
-        String enResult = llmProvider.chat("You are a news editor. Output ONLY JSON, no markdown.", enPrompt);
-        Map<String, Object> en = parseJsonSafe(enResult);
+        // ---- 多语言 AI 分析 ----
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (LangDef lang : TARGET_LANGUAGES) {
+            String prompt = buildLangPrompt(lang, title, content != null ? content : "");
+            String aiResult = llmProvider.chat(lang.systemPrompt, prompt);
+            Map<String, Object> section = parseJsonSafe(aiResult);
+            if (section == null) section = new LinkedHashMap<>();
+            // 标题回退：LLM 未生成则用原标题
+            if (!section.containsKey("title") || section.get("title") == null
+                    || section.get("title").toString().isBlank()) {
+                section.put("title", title != null ? title : "");
+            }
+            result.put(lang.langCode, section);
+            log.info("AI [{}]: {}chars", lang.langCode,
+                    section.getOrDefault("summary", "").toString().length());
+        }
 
         // ---- 分类 ----
         String clsPrompt = promptManager.render("news-classify",
                 Map.of("title", title != null ? title : "", "content", shortContent));
-        String clsResult = llmProvider.chat("只输出JSON：{\"category\":\"类别\",\"subCategory\":\"子类别\"}", clsPrompt);
+        String clsResult = llmProvider.chat("Output ONLY JSON: {\"category\":\"...\",\"subCategory\":\"...\"}", clsPrompt);
         Map<String, Object> cls = parseJsonSafe(clsResult);
 
         // ---- 实体 ----
         String entPrompt = promptManager.render("entity-extract",
                 Map.of("content", shortContent));
-        String entResult = llmProvider.chat("只输出JSON数组，不要其他文字。", entPrompt);
+        String entResult = llmProvider.chat("Output ONLY a JSON array, nothing else.", entPrompt);
 
-        // ---- 组装多语言结果 ----
-        Map<String, Object> result = new LinkedHashMap<>();
-
-        // 原标题存入 zh section，英文标题存入 en section
-        if (zh == null) zh = new LinkedHashMap<>();
-        zh.put("title", title != null ? title : "");
-        if (en == null) en = new LinkedHashMap<>();
-        if (!en.containsKey("title") || en.get("title") == null || en.get("title").toString().isBlank()) {
-            en.put("title", title != null ? title : ""); // fallback to original
-        }
-        result.put("zh", zh);
-        result.put("en", en);
-        result.put("category", cls.getOrDefault("category", "科技"));
+        result.put("category", cls.getOrDefault("category", "Technology"));
         result.put("subCategory", cls.getOrDefault("subCategory", ""));
         result.put("entities", parseJsonSafe(entResult));
-        result.put("facts", zh.getOrDefault("facts", java.util.Collections.emptyList()));
-        result.put("background", zh.getOrDefault("background", ""));
-        result.put("impact", zh.getOrDefault("impact", ""));
 
-        String summaryZh = (String) zh.getOrDefault("summary", "");
-        String summaryEn = (String) en.getOrDefault("summary", "");
-        log.info("AI分析完成: zh={}chars, en={}chars, category={}", summaryZh.length(), summaryEn.length(), result.get("category"));
+        log.info("AI分析完成: languages={}, category={}", result.keySet().stream()
+                .filter(TARGET_LANGUAGES.stream().map(LangDef::langCode).toList()::contains)
+                .toList(), result.get("category"));
 
         return result;
     }
 
-    private String buildEnglishPrompt(String title, String content) {
-        return "Analyze this news and output strict JSON (no markdown, no explanation):\n" +
-                "{\"title\":\"English translation of the original title\",\n" +
-                " \"summary\":\"2-3 sentence English summary (80-120 words)\",\n" +
-                " \"facts\":[\"key fact 1\",\"key fact 2\",\"key fact 3\"],\n" +
-                " \"background\":\"context (40-60 words)\",\n" +
-                " \"impact\":\"potential impact (40-60 words)\"}\n\n" +
-                "Example output:\n" +
-                "{\"title\":\"Apple Unveils M4-Powered MacBook Pro with 24-Hour Battery Life\"," +
-                "\"summary\":\"Apple unveiled its M4-powered MacBook Pro with significant performance gains and extended battery life.\"," +
-                "\"facts\":[\"M4 chip uses 2nm process\",\"CPU 50pct faster, GPU 80pct faster\",\"24-hour battery life\"]," +
-                "\"background\":\"This continues Apple's annual chip upgrade cycle following M3.\"," +
-                "\"impact\":\"Further solidifies Apple's lead in high-end laptops and pushes ARM architecture adoption.\"}\n\n" +
-                "Title: " + (title != null ? title : "") + "\n" +
-                "Content: " + (content != null ? content : "");
+    /** 为目标语言构建分析 prompt — 所有语言走同一个模板，language 参数驱动 LLM 输出语言 */
+    private String buildLangPrompt(LangDef lang, String title, String content) {
+        return promptManager.render("news-summary", Map.of(
+                "language", lang.langName,
+                "title", title != null ? title : "",
+                "content", content != null ? content : ""));
     }
 
     @SuppressWarnings("unchecked")

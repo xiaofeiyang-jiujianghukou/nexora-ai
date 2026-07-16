@@ -13,10 +13,14 @@ import { useI18n } from 'vue-i18n';
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs';
 import en from 'element-plus/dist/locale/en.mjs';
 import AppLayout from '@/components/layout/AppLayout.vue';
+import { localeToLang } from '@/locales/config';
 
 const i18n = useI18n();
 
+/** Element Plus locale：按语言 key 匹配，未知语言回退到 en */
 const elLocale = computed(() => {
-  return i18n.locale.value === 'zh-CN' ? zhCn : en;
+  const lang = localeToLang(i18n.locale.value);
+  if (lang === 'zh') return zhCn;
+  return en; // 其余全部 fallback 到 en
 });
 </script>

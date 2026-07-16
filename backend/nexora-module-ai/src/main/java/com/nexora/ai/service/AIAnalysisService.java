@@ -77,9 +77,18 @@ public class AIAnalysisService {
         }
 
         // 4. 更新文章
-        // 保存主摘要（中文为默认）和完整多语言 AI 结果 JSON
-        Map<String, Object> zh = (Map<String, Object>) result.get("zh");
-        article.setSummary(zh != null ? (String) zh.getOrDefault("summary", "") : "");
+        // 主摘要取第一个可用语言的 summary（回退到空字符串）
+        String mainSummary = "";
+        for (Object sectionObj : result.values()) {
+            if (sectionObj instanceof Map<?, ?> section) {
+                Object s = section.get("summary");
+                if (s instanceof String str && !str.isBlank()) {
+                    mainSummary = str;
+                    break;
+                }
+            }
+        }
+        article.setSummary(mainSummary);
         article.setAiResult(JsonUtils.toJson(result));
         if (category != null) {
             article.setCategoryId(category.getId());

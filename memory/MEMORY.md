@@ -1,2 +1,3 @@
-- [Session Handoff](session-handoff.md) — 下个会话从 P1 消息流水线开始（2026-07-15）
+- [Session Handoff](session-handoff.md) — 下个会话：MCP 修复生效后浏览器完整验证（2026-07-16）
+- [No Downgrade Rule](no-downgrade-rule.md) — AI 协作铁律：工具不可用时必须修复根因，禁止 CLI 降级替代
 - [Doc Sync Rule](doc-sync-rule.md) — 会话关闭前必须同步所有关联文档

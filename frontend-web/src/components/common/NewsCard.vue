@@ -34,8 +34,10 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { localeToLang, getLocalizedContent } from '@/locales/config';
 
 export interface NewsItem {
   id: number;
@@ -48,7 +50,7 @@ export interface NewsItem {
   viewCount?: number;
   tags?: string[];
   publishTime?: string;
-  /** 多语言 AI 分析结果: { zh: {summary, facts, background, impact}, en: {...}, ... } */
+  /** 多语言 AI 分析结果: { zh: {summary, facts, background, impact}, en: {...}, ja: {...}, ... } */
   aiResult?: Record<string, any>;
 }
 
@@ -56,16 +58,13 @@ const props = defineProps<{ item: NewsItem }>();
 const router = useRouter();
 const { t, locale } = useI18n();
 
-/** 根据当前语言从 aiResult 取摘要，回退到 summary 字段 */
-const lang = computed(() => locale.value === 'en-US' ? 'en' : 'zh');
+/** 当前语言 key（'zh-CN' → 'zh', 'en-US' → 'en'） */
+const lang = computed(() => localeToLang(locale.value));
 
 /** 双语标题：优先取 aiResult[lang].title，回退到原始 title */
 const displayTitle = computed(() => {
-  const ai = props.item.aiResult;
-  if (ai) {
-    const localized = ai[lang.value] as Record<string, any> | undefined;
-    if (localized?.title) return localized.title as string;
-  }
+  const localized = getLocalizedContent<Record<string, any>>(props.item.aiResult, lang.value);
+  if (localized?.title) return localized.title as string;
   return props.item.title;
 });
 
@@ -78,14 +77,8 @@ const categoryLabel = computed(() => {
 });
 
 const summaryText = computed(() => {
-  const ai = props.item.aiResult;
-  if (ai) {
-    const localized = ai[lang.value] as Record<string, any> | undefined;
-    if (localized?.summary) return localized.summary as string;
-    // fallback to zh if current lang section missing
-    const zh = ai['zh'] as Record<string, any> | undefined;
-    if (zh?.summary) return zh.summary as string;
-  }
+  const localized = getLocalizedContent<Record<string, any>>(props.item.aiResult, lang.value);
+  if (localized?.summary) return localized.summary as string;
   return props.item.summary || '';
 });
 
@@ -100,7 +93,7 @@ function formatTime(time?: string): string {
   const diff = now.getTime() - d.getTime();
   if (diff < 3600000) return Math.floor(diff / 60000) + t('common.minAgo');
   if (diff < 86400000) return Math.floor(diff / 3600000) + t('common.hourAgo');
-  return d.toLocaleDateString('zh-CN');
+  return d.toLocaleDateString(locale.value);
 }
 </script>
 
