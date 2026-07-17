@@ -99,7 +99,12 @@ data:
               fields:
                 application: nexora
 
-    # 自动发现 JSON 日志并解析 (只解析 JSON 格式日志)
+    # 解析 JSON 日志
+    processors:
+      - decode_json_fields:
+          fields: ["message"]
+          target: ""
+          overwrite_keys: true
     processors:
       - decode_json_fields:
           fields: ["message"]

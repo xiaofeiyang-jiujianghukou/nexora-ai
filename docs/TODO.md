@@ -1,6 +1,6 @@
 # Nexora AI — 开发日志
 
-> 最后更新：2026-07-17 (Phase 1 MVP 收尾 — 全栈生产环境 + K3s 集群 + 5 语言多语言)    
+> 最后更新：2026-07-18 (Phase 1 MVP 100% — P9 全栈打磨完成，K3s 全链路验证通过)    
 > GitHub：https://github.com/xiaofeiyang-jiujianghukou/nexora-ai.git
 >
 > **Phase 1 MVP 完成度：100%** | 总测试：48 (35 单元/集成 + 13 E2E) | 0 failures | K3s 全栈验证通过
@@ -183,3 +183,17 @@ cd frontend-web && npx playwright test
 | ELK 日志收集 ✅ | JSON 日志 + Filebeat DaemonSet + Kibana，全栈日志可观测 |
 | k6 性能测试 ✅ | smoke + load/stress/soak 脚本，6 端点覆盖，p95 阈值，k6 v0.54.0 |
 | LLM 多语言摘要质量 ✅ | System prompt 强化 + prompt 模板加翻译验证步骤，ja/ko/de 不再回退 English |
+
+---
+
+## 📋 已知待优化 (P10)
+
+| 事项 | 说明 |
+|------|------|
+| **日志服务区分** | Kibana 按 `kubernetes.labels.app` 过滤可用但不够友好，理想方案：Filebeat 映射短字段 `service:backend/frontend/mysql` |
+| **Grafana 端口冲突** | k3d 端口 3000/9090 被 loadbalancer 占用，当前用 13000/19090 替代，正式环境需修复 |
+| **Grafana 密码** | 首次登录会强制改密，部署时需跳过或预设 |
+| **Dockerfile CI 缓存** | 多阶段构建已拆依赖层 + 源码层，pom.xml 不变时复用缓存 |
+| **AI 文章覆盖率** | 319 篇中 22 篇缺 AI 分析（93.1%），已触发 MQ 异步回填 |
+| **Filebeat 配置** | 当前 YAML 较基础，后续可加多行日志合并、日志级别过滤等 |
+| **Sentry DSN** | 需要填入真实 Sentry DSN 才能激活错误追踪 |
