@@ -137,7 +137,7 @@ services:
 
   # ---- Prometheus ----
   prometheus:
-    image: prom/prometheus:v2.55.0
+    image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/prometheus:v3.3.0
     container_name: nexora-prometheus
     restart: unless-stopped
     command:
@@ -156,7 +156,7 @@ services:
 
   # ---- Grafana ----
   grafana:
-    image: grafana/grafana:11.2.0
+    image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/grafana:11.6.0
     container_name: nexora-grafana
     restart: unless-stopped
     environment:
