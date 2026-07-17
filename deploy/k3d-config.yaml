@@ -12,12 +12,8 @@ metadata:
 servers: 1
 agents: 2
 
-# ACR 镜像注册表
-registries:
-  create:
-    name: nexora-registry
-    host: "0.0.0.0"
-    hostPort: "5000"
+# ACR 镜像注册表（不需要本地 registry）
+registries: {}
 
 # 端口映射
 ports:
