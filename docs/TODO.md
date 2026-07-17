@@ -150,10 +150,19 @@ cd frontend-web && npx playwright test
 |------|------|
 | Favorites E2E 修复 | 邮箱改为 beforeEach 内生成，修复重名重复注册 |
 | 推荐卡片 0 结果 | 新用户无历史时允许 0 推荐，验证区域存在即可 |
-| 多语言摘要 | 放松断言：验证 UI 切换不崩溃 + 内容可见 (LLM 摘要多语言需后续优化) |
+| 多语言摘要 ✅ | 5 语言: zh/en/ja/ko/de，后端 TARGET_LANGUAGES + 前端 locale + 语言下拉 |
 | **E2E 结果** | **13/13 全部通过** 🎉 |
 
-### P7 — K3s 生产部署
+### P7 — 多语言扩展 ✅ (2026-07-17)
+
+| 事项 | 说明 |
+|------|------|
+| 后端 5 语言 | NewsAIManager + AIAnalysisService 扩展到 zh/en/ja/ko/de |
+| 前端 locale | ja-JP/ko-KR/de-DE 三套 i18n 消息文件 |
+| 语言下拉 | 5 选项：中文、EN、日本語、한국어、DE |
+| 回退逻辑 | ja/ko/de 无 AI 内容时自动回落 English |
+
+### P8 — K3s 生产部署
 
 | 事项 | 说明 |
 |------|------|
