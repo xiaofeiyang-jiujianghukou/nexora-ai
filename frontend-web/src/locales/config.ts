@@ -9,7 +9,7 @@
 
 /** 所有支持的语言（顺序 = 下拉菜单顺序） */
 export const SUPPORTED_LOCALES = [
-  'zh-CN', 'en-US',
+  'zh-CN', 'en-US', 'ja-JP', 'ko-KR', 'de-DE',
 ] as const;
 
 /** 默认语言 */
@@ -22,6 +22,9 @@ export const FALLBACK_LOCALE = 'en-US';
 const DISPLAY_NAMES: Record<string, string> = {
   'zh-CN': '中文',
   'en-US': 'EN',
+  'ja-JP': '日本語',
+  'ko-KR': '한국어',
+  'de-DE': 'DE',
 };
 
 /**

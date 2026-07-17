@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "home": "Startseite",
+    "search": "Suche",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "profile": "Profil",
+    "favorites": "Favoriten",
+    "subscriptions": "Abos",
+    "logout": "Abmelden"
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler aufgetreten",
+    "empty": "Keine Daten",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "back": "Zurück",
+    "more": "Mehr",
+    "refresh": "Aktualisieren",
+    "close": "Schließen",
+    "requestFailed": "Anfrage fehlgeschlagen",
+    "operationFailed": "Vorgang fehlgeschlagen",
+    "minAgo": "Min. zuvor",
+    "hourAgo": "Std. zuvor"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "nickname": "Spitzname",
+    "confirmPassword": "Passwort bestätigen",
+    "loginSuccess": "Anmeldung erfolgreich",
+    "registerSuccess": "Registrierung erfolgreich",
+    "noAccount": "Noch keinen Account? Registrieren",
+    "hasAccount": "Bereits registriert? Anmelden",
+    "emailRequired": "E-Mail erforderlich",
+    "emailInvalid": "Ungültige E-Mail",
+    "passwordRequired": "Passwort erforderlich",
+    "nicknameMax": "Maximal 64 Zeichen",
+    "passwordMismatch": "Passwörter stimmen nicht überein",
+    "reEnterPassword": "Passwort erneut eingeben"
+  },
+  "news": {
+    "hot": "Heute Top",
+    "domestic": "Inland",
+    "international": "International",
+    "aiTech": "KI & Tech",
+    "finance": "Finanzen",
+    "myFeed": "Gefolgt",
+    "summary": "KI-Zusammenfassung",
+    "facts": "Kernfakten",
+    "background": "Hintergrund",
+    "impact": "Auswirkung",
+    "related": "Ähnliche News",
+    "source": "Quelle",
+    "viewOriginal": "Original anzeigen",
+    "favorite": "Favorisieren",
+    "unfavorite": "Favorit entfernen",
+    "favoriteAdded": "Favorit hinzugefügt",
+    "favoriteRemoved": "Favorit entfernt",
+    "publishTime": "Veröffentlicht",
+    "hotScore": "Beliebtheit",
+    "readCount": "Aufrufe"
+  },
+  "search": {
+    "placeholder": "News, Personen, Unternehmen suchen...",
+    "advanced": "Erweiterte Suche",
+    "noResults": "Keine Ergebnisse",
+    "results": "Suchergebnisse",
+    "filter": "Filter",
+    "category": "Kategorie",
+    "dateRange": "Zeitraum",
+    "source": "Quelle",
+    "hint": "Suchbegriff eingeben"
+  },
+  "user": {
+    "profile": "Profil",
+    "settings": "Einstellungen",
+    "language": "Sprache",
+    "switchLanguage": "Sprache wechseln",
+    "theme": "Design",
+    "lightMode": "Hell",
+    "darkMode": "Dunkel"
+  },
+  "subscribe": {
+    "title": "Abos",
+    "add": "Abo hinzufügen",
+    "type": "Typ",
+    "target": "Ziel",
+    "tag": "Tag",
+    "entity": "Entität",
+    "category": "Kategorie",
+    "company": "Unternehmen",
+    "addSuccess": "Abo hinzugefügt",
+    "removeSuccess": "Abo entfernt"
+  },
+  "category": {
+    "domestic": "Inland",
+    "international": "International",
+    "technology": "Technologie",
+    "ai": "KI",
+    "finance": "Finanzen",
+    "society": "Gesellschaft",
+    "sports": "Sport"
+  },
+  "home": {
+    "forYou": "Für dich",
+    "basedOnInterests": "Basierend auf deinen Interessen"
+  },
+  "page": {
+    "home": "Startseite",
+    "newsDetail": "News-Details",
+    "search": "Suche"
+  }
+}

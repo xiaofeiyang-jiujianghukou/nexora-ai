@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "home": "ホーム",
+    "search": "検索",
+    "login": "ログイン",
+    "register": "登録",
+    "profile": "プロフィール",
+    "favorites": "お気に入り",
+    "subscriptions": "購読",
+    "logout": "ログアウト"
+  },
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "empty": "データがありません",
+    "confirm": "確認",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "back": "戻る",
+    "more": "もっと見る",
+    "refresh": "更新",
+    "close": "閉じる",
+    "requestFailed": "リクエスト失敗",
+    "operationFailed": "操作失敗",
+    "minAgo": "分前",
+    "hourAgo": "時間前"
+  },
+  "auth": {
+    "login": "ログイン",
+    "register": "登録",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "nickname": "ニックネーム",
+    "confirmPassword": "パスワード確認",
+    "loginSuccess": "ログイン成功",
+    "registerSuccess": "登録成功",
+    "noAccount": "アカウントをお持ちでない方は新規登録",
+    "hasAccount": "既にアカウントをお持ちの方はログイン",
+    "emailRequired": "メールアドレスを入力してください",
+    "emailInvalid": "メールアドレスの形式が正しくありません",
+    "passwordRequired": "パスワードを入力してください",
+    "nicknameMax": "最大64文字",
+    "passwordMismatch": "パスワードが一致しません",
+    "reEnterPassword": "パスワードを再入力"
+  },
+  "news": {
+    "hot": "本日の話題",
+    "domestic": "国内",
+    "international": "国際",
+    "aiTech": "AI技術",
+    "finance": "金融",
+    "myFeed": "フォロー中",
+    "summary": "AI要約",
+    "facts": "重要事実",
+    "background": "背景",
+    "impact": "影響分析",
+    "related": "関連ニュース",
+    "source": "ソース",
+    "viewOriginal": "原文を見る",
+    "favorite": "お気に入り",
+    "unfavorite": "お気に入り解除",
+    "favoriteAdded": "お気に入り追加済み",
+    "favoriteRemoved": "お気に入り解除済み",
+    "publishTime": "公開日時",
+    "hotScore": "人気度",
+    "readCount": "閲覧数"
+  },
+  "search": {
+    "placeholder": "ニュース、人物、企業を検索...",
+    "advanced": "詳細検索",
+    "noResults": "該当する結果がありません",
+    "results": "検索結果",
+    "filter": "フィルター",
+    "category": "カテゴリ",
+    "dateRange": "期間",
+    "source": "ソース",
+    "hint": "キーワードを入力して検索"
+  },
+  "user": {
+    "profile": "個人情報",
+    "settings": "設定",
+    "language": "言語",
+    "switchLanguage": "言語切替",
+    "theme": "テーマ",
+    "lightMode": "ライトモード",
+    "darkMode": "ダークモード"
+  },
+  "subscribe": {
+    "title": "購読管理",
+    "add": "購読追加",
+    "type": "タイプ",
+    "target": "対象",
+    "tag": "タグ",
+    "entity": "エンティティ",
+    "category": "カテゴリ",
+    "company": "企業",
+    "addSuccess": "購読追加完了",
+    "removeSuccess": "購読解除完了"
+  },
+  "category": {
+    "domestic": "国内",
+    "international": "国際",
+    "technology": "テクノロジー",
+    "ai": "AI",
+    "finance": "金融",
+    "society": "社会",
+    "sports": "スポーツ"
+  },
+  "home": {
+    "forYou": "おすすめ",
+    "basedOnInterests": "あなたの興味に基づくおすすめ"
+  },
+  "page": {
+    "home": "ホーム",
+    "newsDetail": "ニュース詳細",
+    "search": "検索"
+  }
+}

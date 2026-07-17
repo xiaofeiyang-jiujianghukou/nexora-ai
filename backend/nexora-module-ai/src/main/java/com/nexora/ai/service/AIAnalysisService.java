@@ -57,7 +57,7 @@ public class AIAnalysisService {
     }
 
     /** 目标分析语言列表（与 NewsAIManager.TARGET_LANGUAGES 保持同步） */
-    private static final List<String> TARGET_LANG_CODES = List.of("zh", "en");
+    private static final List<String> TARGET_LANG_CODES = List.of("zh", "en", "ja", "ko", "de");
 
     /**
      * 处理 AI 分析任务：从 DB 读文章 → AI 分析 → 批量写入 i18n 表 → 触发 ES 索引

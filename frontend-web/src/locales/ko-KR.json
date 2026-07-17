@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "home": "홈",
+    "search": "검색",
+    "login": "로그인",
+    "register": "회원가입",
+    "profile": "프로필",
+    "favorites": "즐겨찾기",
+    "subscriptions": "구독",
+    "logout": "로그아웃"
+  },
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류 발생",
+    "empty": "데이터 없음",
+    "confirm": "확인",
+    "cancel": "취소",
+    "save": "저장",
+    "delete": "삭제",
+    "edit": "편집",
+    "back": "뒤로",
+    "more": "더 보기",
+    "refresh": "새로고침",
+    "close": "닫기",
+    "requestFailed": "요청 실패",
+    "operationFailed": "작업 실패",
+    "minAgo": "분 전",
+    "hourAgo": "시간 전"
+  },
+  "auth": {
+    "login": "로그인",
+    "register": "회원가입",
+    "email": "이메일",
+    "password": "비밀번호",
+    "nickname": "닉네임",
+    "confirmPassword": "비밀번호 확인",
+    "loginSuccess": "로그인 성공",
+    "registerSuccess": "회원가입 성공",
+    "noAccount": "계정이 없으신가요? 가입하기",
+    "hasAccount": "이미 계정이 있으신가요? 로그인",
+    "emailRequired": "이메일을 입력하세요",
+    "emailInvalid": "올바른 이메일 형식이 아닙니다",
+    "passwordRequired": "비밀번호를 입력하세요",
+    "nicknameMax": "최대 64자",
+    "passwordMismatch": "비밀번호가 일치하지 않습니다",
+    "reEnterPassword": "비밀번호 재입력"
+  },
+  "news": {
+    "hot": "오늘의 핫토픽",
+    "domestic": "국내",
+    "international": "국제",
+    "aiTech": "AI 기술",
+    "finance": "금융",
+    "myFeed": "팔로우 중",
+    "summary": "AI 요약",
+    "facts": "핵심 사실",
+    "background": "배경",
+    "impact": "영향 분석",
+    "related": "관련 뉴스",
+    "source": "출처",
+    "viewOriginal": "원문 보기",
+    "favorite": "즐겨찾기",
+    "unfavorite": "즐겨찾기 해제",
+    "favoriteAdded": "즐겨찾기 추가됨",
+    "favoriteRemoved": "즐겨찾기 해제됨",
+    "publishTime": "게시 시간",
+    "hotScore": "인기도",
+    "readCount": "조회수"
+  },
+  "search": {
+    "placeholder": "뉴스, 인물, 기업 검색...",
+    "advanced": "고급 검색",
+    "noResults": "검색 결과 없음",
+    "results": "검색 결과",
+    "filter": "필터",
+    "category": "카테고리",
+    "dateRange": "기간",
+    "source": "출처",
+    "hint": "키워드를 입력하여 검색"
+  },
+  "user": {
+    "profile": "개인정보",
+    "settings": "설정",
+    "language": "언어",
+    "switchLanguage": "언어 변경",
+    "theme": "테마",
+    "lightMode": "라이트 모드",
+    "darkMode": "다크 모드"
+  },
+  "subscribe": {
+    "title": "구독 관리",
+    "add": "구독 추가",
+    "type": "유형",
+    "target": "대상",
+    "tag": "태그",
+    "entity": "엔티티",
+    "category": "카테고리",
+    "company": "기업",
+    "addSuccess": "구독 추가됨",
+    "removeSuccess": "구독 해제됨"
+  },
+  "category": {
+    "domestic": "국내",
+    "international": "국제",
+    "technology": "기술",
+    "ai": "AI",
+    "finance": "금융",
+    "society": "사회",
+    "sports": "스포츠"
+  },
+  "home": {
+    "forYou": "추천",
+    "basedOnInterests": "관심사 기반 추천"
+  },
+  "page": {
+    "home": "홈",
+    "newsDetail": "뉴스 상세",
+    "search": "검색"
+  }
+}

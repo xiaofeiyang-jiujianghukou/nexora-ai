@@ -32,7 +32,10 @@ public class NewsAIManager {
     private record LangDef(String langCode, String langName, String systemPrompt) {}
     private static final List<LangDef> TARGET_LANGUAGES = List.of(
             new LangDef("zh", "中文", "你是一名中文新闻编辑。所有内容必须用中文输出。只输出JSON，不要markdown代码块。"),
-            new LangDef("en", "English", "You are an English news editor. ALL content MUST be in English. Output ONLY JSON, no markdown.")
+            new LangDef("en", "English", "You are an English news editor. ALL output MUST be in English — translate the title, write the summary/facts/background/impact in English. Even if the source is in another language, you MUST output English. Output ONLY JSON, no markdown."),
+            new LangDef("ja", "日本語", "あなたは日本語のニュース編集者です。全ての出力は日本語で行ってください。タイトルを含め、すべてのフィールドを日本語で出力してください。JSONのみを出力し、markdownは使用しないでください。"),
+            new LangDef("ko", "한국어", "당신은 한국어 뉴스 편집자입니다. 모든 출력은 한국어로 해야 합니다. 제목을 포함한 모든 필드를 한국어로 출력하세요. JSON만 출력하고 마크다운은 사용하지 마세요."),
+            new LangDef("de", "Deutsch", "Du bist ein deutscher Nachrichtenredakteur. ALLE Ausgaben MÜSSEN auf Deutsch sein — übersetze den Titel, schreibe Zusammenfassung/Fakten/Hintergrund/Auswirkungen auf Deutsch. Auch wenn die Quelle in einer anderen Sprache ist, MUSST du Deutsch ausgeben. Gib NUR JSON aus, kein Markdown.")
     );
 
     public Map<String, Object> analyze(String title, String content) {
