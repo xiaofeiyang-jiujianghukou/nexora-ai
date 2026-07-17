@@ -99,15 +99,12 @@ data:
               fields:
                 application: nexora
 
-    # 自动发现 JSON 日志并解析
+    # 自动发现 JSON 日志并解析 (只解析 JSON 格式日志)
     processors:
       - decode_json_fields:
           fields: ["message"]
           target: ""
           overwrite_keys: true
-          when:
-            contains:
-              message: "{"@timestamp""
 
     output.elasticsearch:
       hosts: ["http://nexora-es:9200"]

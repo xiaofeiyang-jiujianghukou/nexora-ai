@@ -57,17 +57,17 @@ metadata:
   name: ingress-nginx
 rules:
   - apiGroups: [""]
-    resources: ["configmaps", "endpoints", "nodes", "pods", "secrets"]
-    verbs: ["list", "watch"]
+    resources: ["configmaps", "endpoints", "nodes", "pods", "secrets", "services"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: ["coordination.k8s.io"]
     resources: ["leases"]
     verbs: ["list", "watch"]
   - apiGroups: [""]
     resources: ["nodes"]
     verbs: ["get"]
-  - apiGroups: [""]
-    resources: ["services"]
-    verbs: ["get", "list", "watch"]
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses"]
     verbs: ["get", "list", "watch"]
@@ -205,7 +205,7 @@ spec:
       serviceAccountName: ingress-nginx
       containers:
         - name: controller
-          image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/k8s-ingress-nginx-controller:v1.11.1
+          image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/controller:v1.11.1
           imagePullPolicy: IfNotPresent
           args:
             - /nginx-ingress-controller
