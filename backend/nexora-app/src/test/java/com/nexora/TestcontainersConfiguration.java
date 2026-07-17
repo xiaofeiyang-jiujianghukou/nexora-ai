@@ -4,7 +4,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.utility.DockerImageName;
 
 /**
  * Testcontainers 共享配置 — 为所有 @SpringBootTest 提供一个真实 MySQL 8 容器。
@@ -16,7 +15,8 @@ public class TestcontainersConfiguration {
     @Bean
     @ServiceConnection
     MySQLContainer<?> mysqlContainer() {
-        return new MySQLContainer<>(DockerImageName.parse("mysql:8.0"))
+        return new MySQLContainer<>(DockerImageName.parse(
+                "crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/mysql:8.0"))
                 .withDatabaseName("nexora")
                 .withReuse(true);
     }
