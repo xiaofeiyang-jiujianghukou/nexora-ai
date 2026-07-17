@@ -30,6 +30,9 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  elasticsearch:
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://nexora-es:9200}
+
 server:
   port: 8080
   compression:
@@ -59,10 +62,6 @@ rocketmq:
   name-server: ${ROCKETMQ_NAMESRV:nexora-rmq-namesrv:9876}
   producer:
     group: nexora-producer-group
-
-spring:
-  elasticsearch:
-    uris: ${SPRING_ELASTICSEARCH_URIS:http://nexora-es:9200}
 
 sentry:
   dsn: ${SENTRY_DSN:}
