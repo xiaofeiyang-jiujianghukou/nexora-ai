@@ -11,7 +11,10 @@ COPY nexora-module-ai nexora-module-ai
 COPY nexora-module-search nexora-module-search
 COPY nexora-module-crawler nexora-module-crawler
 COPY nexora-module-notification nexora-module-notification
-RUN mvn clean package -DskipTests -pl nexora-app -am -q
+RUN mvn clean package -DskipTests -pl nexora-app -am -q && \
+    cd /app/nexora-app/target && \
+    mv nexora-app-*.jar app.jar && \
+    rm -f *.original
 
 # ---- Stage 2: Run ----
 FROM eclipse-temurin:17-jre-alpine
@@ -19,7 +22,7 @@ RUN addgroup -S nexora && adduser -S nexora -G nexora
 USER nexora
 WORKDIR /app
 
-COPY --from=build /app/nexora-app/target/nexora-app-*.jar app.jar
+COPY --from=build /app/nexora-app/target/app.jar app.jar
 
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
