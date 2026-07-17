@@ -1,7 +1,9 @@
 # Nexora AI — 开发日志
 
-> 最后更新：2026-07-17 (全栈生产环境上线，Dockerfile JAR 修复，ACR 镜像全部切换)    
+> 最后更新：2026-07-17 (Phase 1 MVP 收尾 — 全栈生产环境 + K3s 集群 + 5 语言多语言)    
 > GitHub：https://github.com/xiaofeiyang-jiujianghukou/nexora-ai.git
+>
+> **Phase 1 MVP 完成度：95%** | 总测试：48 (35 单元/集成 + 13 E2E) | 0 failures
 
 ---
 
@@ -162,11 +164,22 @@ cd frontend-web && npx playwright test
 | 语言下拉 | 5 选项：中文、EN、日本語、한국어、DE |
 | 回退逻辑 | ja/ko/de 无 AI 内容时自动回落 English |
 
-### P8 — K3s 生产部署
+### P8 — K3s 生产部署 ✅ (2026-07-17)
 
 | 事项 | 说明 |
 |------|------|
-| K3s 集群部署 | k3d 创建集群 → ACR 镜像导入 → deploy.sh 一键部署 |
+| **K3s 集群** | k3d 创建 (1 server + 2 agents, v1.34.9-k3s1)，ACR 镜像导入 |
+| **全栈部署** | 11 pods Running: MySQL/Redis/ES(ik)/RocketMQ/Backend×2/Frontend×2/Prometheus/Grafana |
+| **清单修复** | ES IK、RocketMQ、SPRING_ELASTICSEARCH_URIS、imagePullPolicy |
+
+### P9 — 生产环境打磨
+
+| 事项 | 说明 |
+|------|------|
+| K3s Ingress | 安装 ingress-nginx 或启用 Traefik，使外部可直接访问 |
+| ES 全文搜索 | 完善 Elasticsearch 索引和搜索端点 |
+| Flutter APP | `flutter pub get && flutter run` 跑起来 |
+| Sentry 错误追踪 | - |
 | ELK 日志收集 | - |
 | k6 性能测试 | - |
-| Sentry 错误追踪 | - |
+| LLM 多语言摘要质量 | 非中英文源文章 → 对应语言摘要的 LLM prompt 优化 |
