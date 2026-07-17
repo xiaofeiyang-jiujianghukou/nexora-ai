@@ -1,5 +1,5 @@
 # ---- Stage 1: Build ----
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/maven:3.9-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 COPY pom.xml .
 COPY nexora-common nexora-common
@@ -11,13 +11,12 @@ COPY nexora-module-ai nexora-module-ai
 COPY nexora-module-search nexora-module-search
 COPY nexora-module-crawler nexora-module-crawler
 COPY nexora-module-notification nexora-module-notification
-RUN mvn clean package -DskipTests -pl nexora-app -am -q && \
+RUN mvn clean package -Dmaven.test.skip=true -pl nexora-app -am -q && \
     cd /app/nexora-app/target && \
-    mv nexora-app-*.jar app.jar && \
-    rm -f *.original
+    cp nexora-app-*.jar app.jar
 
 # ---- Stage 2: Run ----
-FROM eclipse-temurin:17-jre-alpine
+FROM crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/eclipse-temurin:21-jre-alpine
 RUN addgroup -S nexora && adduser -S nexora -G nexora
 USER nexora
 WORKDIR /app

@@ -40,7 +40,7 @@ services:
 
   # ---- Elasticsearch 8 ----
   elasticsearch:
-    image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/elasticsearch:8.15.0
+    image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/elasticsearch:8.15.0-ik
     container_name: nexora-es
     restart: unless-stopped
     environment:
@@ -103,12 +103,15 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       ROCKETMQ_NAMESRV: rocketmq-namesrv:9876
+      SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-deepseek-v4-pro}
     depends_on:
       mysql:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
       rocketmq-broker:
         condition: service_healthy
