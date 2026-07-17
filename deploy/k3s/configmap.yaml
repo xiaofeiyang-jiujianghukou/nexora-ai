@@ -8,6 +8,7 @@ data:
   REDIS_HOST: "nexora-redis"
   REDIS_PORT: "6379"
   ES_ENABLED: "true"
+  SPRING_ELASTICSEARCH_URIS: "http://nexora-es:9200"
   LLM_BASE_URL: "https://api.deepseek.com"
   LLM_MODEL: "deepseek-v4-pro"
   JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC"
