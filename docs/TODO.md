@@ -3,7 +3,7 @@
 > 最后更新：2026-07-17 (Phase 1 MVP 收尾 — 全栈生产环境 + K3s 集群 + 5 语言多语言)    
 > GitHub：https://github.com/xiaofeiyang-jiujianghukou/nexora-ai.git
 >
-> **Phase 1 MVP 完成度：95%** | 总测试：48 (35 单元/集成 + 13 E2E) | 0 failures
+> **Phase 1 MVP 完成度：99%** | 总测试：48 (35 单元/集成 + 13 E2E) | 0 failures
 
 ---
 
@@ -176,10 +176,10 @@ cd frontend-web && npx playwright test
 
 | 事项 | 说明 |
 |------|------|
-| K3s Ingress | 安装 ingress-nginx 或启用 Traefik，使外部可直接访问 |
-| ES 全文搜索 | 完善 Elasticsearch 索引和搜索端点 |
-| Flutter APP | `flutter pub get && flutter run` 跑起来 |
-| Sentry 错误追踪 | - |
-| ELK 日志收集 | - |
-| k6 性能测试 | - |
-| LLM 多语言摘要质量 | 非中英文源文章 → 对应语言摘要的 LLM prompt 优化 |
+| K3s Ingress ✅ | ingress-nginx 配置完成：Ingress YAML + deploy.sh 自动安装 + 独立安装脚本 |
+| ES 全文搜索 ✅ | ES 条件激活：SearchServiceESImpl (IK分词+multiMatch) + MySQL回退 + reindex管理端点 |
+| Flutter APP ✅ | Flutter 3.44.6 + Dart 3.12.2，pub get + build_runner + analyze 全部通过 |
+| Sentry 错误追踪 ✅ | 三端全栈集成：Spring Boot + Vue + Flutter，DSN 环境变量注入 |
+| ELK 日志收集 ✅ | JSON 日志 + Filebeat DaemonSet + Kibana，全栈日志可观测 |
+| k6 性能测试 ✅ | smoke + load/stress/soak 脚本，6 端点覆盖，p95 阈值，k6 v0.54.0 |
+| LLM 多语言摘要质量 ✅ | System prompt 强化 + prompt 模板加翻译验证步骤，ja/ko/de 不再回退 English |

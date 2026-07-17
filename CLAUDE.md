@@ -119,6 +119,26 @@ crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/
 
 **注意**：Spring Boot Maven 项目未使用 `spring-boot-starter-parent`，`nexora-app/pom.xml` 必须显式配置 `<goal>repackage</goal>`，否则只产出 thin JAR (28KB 无 Main-Class)。
 
+## 国内镜像加速
+
+部署在国内时，**所有包管理器、Docker、Flutter 必须使用国内镜像**，否则下载超慢或失败：
+
+| 工具 | 镜像 | 配置方式 |
+|------|------|----------|
+| **Maven** | `https://maven.aliyun.com/repository/public` | `~/.m2/settings.xml` 已配置 |
+| **Docker Hub** | `crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com` | ACR 已全量迁移 |
+| **Flutter SDK** | `https://storage.flutter-io.cn` | 环境变量 `FLUTTER_STORAGE_BASE_URL`（用户级已设） |
+| **Pub/Dart** | `https://pub.flutter-io.cn` | 环境变量 `PUB_HOSTED_URL`（用户级已设） |
+| **npm/pnpm** | `https://registry.npmmirror.com` | 按需 `--registry` 或 `.npmrc` |
+
+```bash
+# Flutter 国内镜像（当前环境）
+$env:FLUTTER_STORAGE_BASE_URL = "https://storage.flutter-io.cn"
+$env:PUB_HOSTED_URL = "https://pub.flutter-io.cn"
+
+# Flutter SDK 位置: D:\flutter (3.44.6, Dart 3.12.2)
+```
+
 ## 快速启动
 
 ```bash

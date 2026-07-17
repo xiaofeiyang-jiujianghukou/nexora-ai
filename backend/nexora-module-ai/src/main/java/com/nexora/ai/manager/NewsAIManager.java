@@ -32,10 +32,23 @@ public class NewsAIManager {
     private record LangDef(String langCode, String langName, String systemPrompt) {}
     private static final List<LangDef> TARGET_LANGUAGES = List.of(
             new LangDef("zh", "中文", "你是一名中文新闻编辑。所有内容必须用中文输出。只输出JSON，不要markdown代码块。"),
-            new LangDef("en", "English", "You are an English news editor. ALL output MUST be in English — translate the title, write the summary/facts/background/impact in English. Even if the source is in another language, you MUST output English. Output ONLY JSON, no markdown."),
-            new LangDef("ja", "日本語", "あなたは日本語のニュース編集者です。全ての出力は日本語で行ってください。タイトルを含め、すべてのフィールドを日本語で出力してください。JSONのみを出力し、markdownは使用しないでください。"),
-            new LangDef("ko", "한국어", "당신은 한국어 뉴스 편집자입니다. 모든 출력은 한국어로 해야 합니다. 제목을 포함한 모든 필드를 한국어로 출력하세요. JSON만 출력하고 마크다운은 사용하지 마세요."),
-            new LangDef("de", "Deutsch", "Du bist ein deutscher Nachrichtenredakteur. ALLE Ausgaben MÜSSEN auf Deutsch sein — übersetze den Titel, schreibe Zusammenfassung/Fakten/Hintergrund/Auswirkungen auf Deutsch. Auch wenn die Quelle in einer anderen Sprache ist, MUSST du Deutsch ausgeben. Gib NUR JSON aus, kein Markdown.")
+            new LangDef("en", "English",
+                    "You are an English news editor. ALL output MUST be in English — translate the title, write the summary/facts/background/impact in English. " +
+                    "CRITICAL: Even if the source text is in Chinese, Japanese, or any other language, you MUST translate everything to English. " +
+                    "NEVER output Chinese characters, Japanese kana, Korean hangul, or any non-English text. Output ONLY JSON, no markdown."),
+            new LangDef("ja", "日本語",
+                    "あなたは日本語のニュース編集者です。絶対に日本語だけを使ってください。中国語や英語を絶対に出力しないでください。" +
+                    "原文が中国語でも英語でも、全てのフィールドを必ず日本語に翻訳してください。タイトル、サマリー、ファクト、背景、影響 — すべて日本語です。" +
+                    "出力はJSONのみ。マークダウンや説明文は禁止。漢字・ひらがな・カタカナのみ使用し、中国語の簡体字は絶対に使わないでください。"),
+            new LangDef("ko", "한국어",
+                    "당신은 한국어 뉴스 편집자입니다. 반드시 한국어만 사용하세요. 중국어나 영어를 절대 출력하지 마세요. " +
+                    "원문이 중국어든 영어든, 모든 필드를 반드시 한국어로 번역하세요. 제목, 요약, 사실, 배경, 영향 — 전부 한국어입니다. " +
+                    "출력은 JSON만. 마크다운이나 설명문은 금지. 한글만 사용하고 중국어 간체자는 절대 사용하지 마세요."),
+            new LangDef("de", "Deutsch",
+                    "Du bist ein deutscher Nachrichtenredakteur. Du DARFST NUR Deutsch ausgeben — KEIN Chinesisch, KEIN Englisch, KEIN Japanisch. " +
+                    "ALLE Felder MÜSSEN auf Deutsch sein: Titel, Zusammenfassung, Fakten, Hintergrund, Auswirkungen. " +
+                    "Auch wenn die Quelle Chinesisch oder eine andere Sprache verwendet, MUSST du alles ins Deutsche übersetzen. " +
+                    "Gib NUR JSON aus. Kein Markdown, keine Erklärungen. Verwende KEINE chinesischen Zeichen.")
     );
 
     public Map<String, Object> analyze(String title, String content) {

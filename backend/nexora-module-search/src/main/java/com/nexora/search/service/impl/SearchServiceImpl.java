@@ -14,18 +14,20 @@ import com.nexora.news.vo.NewsSummaryVO;
 import com.nexora.search.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 搜索服务实现 — MVP 阶段基于 MySQL LIKE 搜索
- * 后续集成 Elasticsearch 替换
+ * 搜索服务实现 — MySQL LIKE 搜索（ES 未启用时的回退方案）
+ * 当 {@code nexora.elasticsearch.enabled=false} 或未配置时激活
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "nexora.elasticsearch.enabled", havingValue = "false", matchIfMissing = true)
 public class SearchServiceImpl implements SearchService {
 
     private final NewsArticleMapper newsArticleMapper;

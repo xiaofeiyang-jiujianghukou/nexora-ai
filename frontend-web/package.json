@@ -10,7 +10,6 @@
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.ts",
     "format": "prettier --write \"src/**/*.{vue,ts,css,json}\"",
-    "test:e2e": "playwright test",
     "generate-api": "openapi-generator-cli generate -i http://localhost:8080/v3/api-docs -g typescript-axios -o src/api/generated"
   },
   "dependencies": {
@@ -22,7 +21,8 @@
     "axios": "^1.7.9",
     "echarts": "^5.5.1",
     "vue-echarts": "^7.0.3",
-    "vue-i18n": "^10.0.5"
+    "vue-i18n": "^10.0.5",
+    "@sentry/vue": "^8.47.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
@@ -35,7 +35,7 @@
     "prettier": "^3.4.2",
     "unplugin-auto-import": "^0.19.0",
     "unplugin-vue-components": "^0.28.0",
-    "@playwright/test": "^1.49.1",
-    "@openapitools/openapi-generator-cli": "^2.15.3"
+    "@openapitools/openapi-generator-cli": "^2.15.3",
+    "@playwright/test": "^1.49.1"
   }
 }

@@ -1,0 +1,225 @@
+# ============================================================
+# ELK 日志收集 — Filebeat DaemonSet + Kibana
+# Filebeat 采集所有 Pod 日志 → Elasticsearch → Kibana 可视化
+# ============================================================
+
+# ---- Filebeat DaemonSet ----
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: filebeat
+  namespace: nexora
+  labels:
+    app: filebeat
+spec:
+  selector:
+    matchLabels:
+      app: filebeat
+  template:
+    metadata:
+      labels:
+        app: filebeat
+    spec:
+      serviceAccountName: filebeat
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: filebeat
+          image: docker.elastic.co/beats/filebeat:8.15.0
+          args:
+            - -e
+            - -E
+            - output.elasticsearch.hosts=["http://nexora-es:9200"]
+          env:
+            - name: ELASTICSEARCH_HOST
+              value: "nexora-es"
+            - name: ELASTICSEARCH_PORT
+              value: "9200"
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/filebeat/filebeat.yml
+              subPath: filebeat.yml
+              readOnly: true
+            - name: varlog
+              mountPath: /var/log/containers
+              readOnly: true
+            - name: varlogpods
+              mountPath: /var/log/pods
+              readOnly: true
+            - name: dockersock
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: filebeat-config
+        - name: varlog
+          hostPath:
+            path: /var/log/containers
+        - name: varlogpods
+          hostPath:
+            path: /var/log/pods
+        - name: dockersock
+          hostPath:
+            path: /var/lib/docker/containers
+---
+# ---- Filebeat ConfigMap ----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: nexora
+data:
+  filebeat.yml: |
+    filebeat.inputs:
+      - type: container
+        paths:
+          - /var/log/containers/*.log
+        processors:
+          - add_kubernetes_metadata:
+              host: ${NODE_NAME}
+              matchers:
+                - logs_path:
+                    logs_path: "/var/log/containers/"
+          - drop_fields:
+              fields: ["agent", "host", "input", "ecs", "log.file.path"]
+              ignore_missing: true
+          - add_fields:
+              target: ""
+              fields:
+                application: nexora
+
+    # 自动发现 JSON 日志并解析
+    processors:
+      - decode_json_fields:
+          fields: ["message"]
+          target: ""
+          overwrite_keys: true
+          when:
+            contains:
+              message: "{"@timestamp""
+
+    output.elasticsearch:
+      hosts: ["http://nexora-es:9200"]
+      index: "nexora-logs-%{+yyyy.MM.dd}"
+      indices:
+        - index: "nexora-logs-%{+yyyy.MM.dd}"
+          when.equals:
+            kubernetes.namespace: "nexora"
+
+    setup.template.name: "nexora-logs"
+    setup.template.pattern: "nexora-logs-*"
+    setup.ilm.enabled: false
+
+    logging.level: info
+    logging.to_files: false
+    logging.json: false
+---
+# ---- Filebeat RBAC ----
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: filebeat
+  namespace: nexora
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: filebeat
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "nodes", "namespaces"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: filebeat
+subjects:
+  - kind: ServiceAccount
+    name: filebeat
+    namespace: nexora
+roleRef:
+  kind: ClusterRole
+  name: filebeat
+  apiGroup: rbac.authorization.k8s.io
+---
+# ---- Kibana ----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: nexora
+  labels:
+    app: kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+        - name: kibana
+          image: docker.elastic.co/kibana/kibana:8.15.0
+          env:
+            - name: ELASTICSEARCH_HOSTS
+              value: "http://nexora-es:9200"
+            - name: SERVER_BASEPATH
+              value: "/kibana"
+            - name: SERVER_REWRITEBASEPATH
+              value: "true"
+          ports:
+            - containerPort: 5601
+              name: http
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /kibana/api/status
+              port: 5601
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /kibana/api/status
+              port: 5601
+            initialDelaySeconds: 120
+            periodSeconds: 60
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: nexora
+  labels:
+    app: kibana
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5601
+      targetPort: 5601
+      name: http
+  selector:
+    app: kibana

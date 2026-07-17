@@ -21,6 +21,14 @@ nexora:
   elasticsearch:
     enabled: true
 
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: development
+  traces-sample-rate: 1.0
+  logging:
+    minimum-event-level: warn
+    minimum-breadcrumb-level: debug
+
 logging:
   level:
     com.nexora: DEBUG

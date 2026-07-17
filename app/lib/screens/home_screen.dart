@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/news_provider.dart';
-import '../providers/locale_provider.dart';
 import '../widgets/news_card.dart';
 import '../widgets/category_bar.dart';
 import '../widgets/lang_switcher.dart';
@@ -51,7 +50,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             // Category bar
-            const SliverToBoxAdapter(child: CategoryBar()),
+            SliverToBoxAdapter(
+              child: CategoryBar(
+                selectedCategory: _selectedCategory,
+                onCategoryChanged: (code) {
+                  setState(() => _selectedCategory = code);
+                },
+              ),
+            ),
             // News list
             newsAsync.when(
               data: (articles) => SliverList(
@@ -126,14 +132,32 @@ class _NewsSearchDelegate extends SearchDelegate<String> {
       );
 
   @override
-  Widget buildResults(BuildContext context) => _buildSearchResults(context);
+  Widget buildResults(BuildContext context) =>
+      _SearchResultsWidget(query: query);
 
   @override
   Widget buildSuggestions(BuildContext context) =>
-      _buildSearchResults(context);
+      _SearchResultsWidget(query: query);
+}
 
-  Widget _buildSearchResults(BuildContext context) {
-    // TODO: wire to searchProvider
-    return const Center(child: Text('Search results'));
+class _SearchResultsWidget extends ConsumerWidget {
+  final String query;
+  const _SearchResultsWidget({required this.query});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (query.isEmpty) return const Center(child: Text('Type to search'));
+    final resultsAsync = ref.watch(searchProvider(query));
+    return resultsAsync.when(
+      data: (articles) => articles.isEmpty
+          ? const Center(child: Text('No results'))
+          : ListView.builder(
+              itemCount: articles.length,
+              itemBuilder: (context, index) =>
+                  NewsCard(article: articles[index]),
+            ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e')),
+    );
   }
 }

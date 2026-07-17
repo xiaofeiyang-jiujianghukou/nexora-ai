@@ -53,17 +53,27 @@ public class PromptManager {
     private String getDefaultPrompt(String name) {
         return switch (name) {
             case "news-summary" -> """
-                    You MUST write ALL output in {{language}}. Do NOT use any other language.
-                    Analyze the following news and output strict JSON (no markdown, no explanation):
+                    ╔══════════════════════════════════════════════════════════════╗
+                    ║  CRITICAL: TRANSLATE + REWRITE entirely in {{language}}.  ║
+                    ║  Source may be in ANY language — detect and DO NOT mirror. ║
+                    ║  NEVER output the original language. NEVER mix languages.   ║
+                    ╚══════════════════════════════════════════════════════════════╝
+
+                    Step 1: Detect the source language of Title/Content.
+                    Step 2: Translate ALL meaningful content into {{language}}.
+                    Step 3: Write every field value in {{language}} — no exceptions.
+
+                    Output strict JSON (no markdown, no explanation, no code blocks):
                     {
-                      "title": "A concise, accurate title translated into {{language}}",
-                      "summary": "2-3 sentences in {{language}} summarizing the core content",
-                      "facts": ["Key fact 1 in {{language}}", "Key fact 2 in {{language}}", "Key fact 3 in {{language}}"],
+                      "title": "News title fully translated into {{language}}",
+                      "summary": "2-3 sentence summary in {{language}}",
+                      "facts": ["Fact 1 in {{language}}", "Fact 2 in {{language}}", "Fact 3 in {{language}}"],
                       "background": "Relevant context in {{language}}",
-                      "impact": "Potential impact of this event in {{language}}"
+                      "impact": "Potential impact in {{language}}"
                     }
 
-                    ⚠️ IMPORTANT: Every single field value MUST be written in {{language}}. Never keep the original language.
+                    VERIFY before responding: Are ALL 5 fields in {{language}}?
+                    If any field contains non-{{language}} text, REWRITE it.
 
                     Title: {{title}}
                     Content: {{content}}

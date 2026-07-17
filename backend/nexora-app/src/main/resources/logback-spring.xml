@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- ============================================================
+         Logback 多环境日志配置
+         dev  → 彩色控制台输出
+         prod → JSON 格式输出（Filebeat → Elasticsearch → Kibana）
+         ============================================================ -->
+
+    <!-- 控制台彩色输出 (dev) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] [%highlight(%-5level)] [%cyan(%logger{36})] - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- JSON 输出 (prod — ELK 日志收集) -->
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"application":"nexora-app"}</customFields>
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+        </encoder>
+    </appender>
+
+    <!-- dev 环境 -->
+    <springProfile name="!prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="com.nexora" level="DEBUG"/>
+        <logger name="org.springframework.web" level="INFO"/>
+        <logger name="com.baomidou.mybatisplus" level="DEBUG"/>
+    </springProfile>
+
+    <!-- prod 环境 — JSON 日志 -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="JSON"/>
+        </root>
+        <logger name="com.nexora" level="INFO"/>
+        <logger name="org.springframework.web" level="WARN"/>
+        <logger name="com.baomidou.mybatisplus" level="WARN"/>
+    </springProfile>
+</configuration>

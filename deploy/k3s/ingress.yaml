@@ -1,25 +1,32 @@
+# ============================================================
+# Nexora AI — Ingress（ingress-nginx）
+# 前提：已安装 ingress-nginx controller（deploy.sh 自动安装）
+#   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.1/deploy/static/provider/cloud/deploy.yaml
+# ============================================================
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nexora-ingress
   namespace: nexora
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: nexora-redirect-https@kubernetescrd
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
 spec:
+  ingressClassName: nginx
   rules:
-    - host: nexora.local
-      http:
+    - http:
         paths:
-          - path: /api
-            pathType: Prefix
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: nexora-backend
                 port:
                   number: 8080
-          - path: /
-            pathType: Prefix
+          - path: /()(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: nexora-frontend

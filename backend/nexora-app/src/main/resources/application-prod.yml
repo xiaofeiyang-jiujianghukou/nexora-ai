@@ -60,6 +60,19 @@ rocketmq:
   producer:
     group: nexora-producer-group
 
+spring:
+  elasticsearch:
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://nexora-es:9200}
+
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: production
+  release: ${APP_VERSION:1.0.0}
+  traces-sample-rate: 0.3
+  logging:
+    minimum-event-level: warn
+    minimum-breadcrumb-level: info
+
 nexora:
   elasticsearch:
     enabled: ${ES_ENABLED:true}
