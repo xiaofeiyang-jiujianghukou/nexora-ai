@@ -119,9 +119,9 @@ jobs:
         id: tags
         run: |
           REPO="ghcr.io/${{ github.repository_owner }}/nexora-app"
-          echo "repo=$REPO" >> $env:GITHUB_OUTPUT
-          echo "sha_tag=$REPO:${{ github.sha }}" >> $env:GITHUB_OUTPUT
-          echo "latest_tag=$REPO:latest" >> $env:GITHUB_OUTPUT
+          echo "repo=$REPO" >> $GITHUB_OUTPUT
+          echo "sha_tag=$REPO:${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "latest_tag=$REPO:latest" >> $GITHUB_OUTPUT
 
       - name: Build & Push Docker Image
         uses: docker/build-push-action@v6
