@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: nexora-frontend
-          image: ghcr.io/xiaofeiyang-jiujianghukou/nexora-frontend:latest
+          image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80

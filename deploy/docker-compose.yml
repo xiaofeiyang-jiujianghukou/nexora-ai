@@ -90,7 +90,7 @@ services:
 
   # ---- Nexora Backend ----
   nexora-backend:
-    image: ghcr.io/xiaofeiyang-jiujianghukou/nexora-app:latest
+    image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest
     container_name: nexora-backend
     restart: unless-stopped
     ports:
@@ -120,7 +120,7 @@ services:
 
   # ---- Nexora Frontend ----
   nexora-frontend:
-    image: ghcr.io/xiaofeiyang-jiujianghukou/nexora-frontend:latest
+    image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-frontend:latest
     container_name: nexora-frontend
     restart: unless-stopped
     ports:

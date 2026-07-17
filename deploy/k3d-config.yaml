@@ -1,0 +1,45 @@
+# ============================================================
+# k3d 集群配置 — 镜像从 ACR 拉取
+# 用法: k3d cluster create nexora --config deploy/k3d-config.yaml
+# 前提: 已将 k3s 系统镜像推送到你的 ACR
+# ============================================================
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+
+metadata:
+  name: nexora
+
+servers: 1
+agents: 2
+
+# ACR 镜像注册表
+registries:
+  create:
+    name: nexora-registry
+    host: "0.0.0.0"
+    hostPort: "5000"
+
+# 端口映射
+ports:
+  - port: 80:80
+    nodeFilters:
+      - loadbalancer
+  - port: 443:443
+    nodeFilters:
+      - loadbalancer
+  - port: 3000:3000
+    nodeFilters:
+      - loadbalancer
+  - port: 9090:9090
+    nodeFilters:
+      - loadbalancer
+
+options:
+  k3s:
+    extraArgs:
+      - arg: --disable=traefik
+        nodeFilters:
+          - server:*
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
