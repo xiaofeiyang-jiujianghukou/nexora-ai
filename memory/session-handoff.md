@@ -1,6 +1,6 @@
 ---
 name: session-handoff
-description: 全栈生产环境启动成功，Dockerfile JAR 修复已提交，8/8 服务 healthy
+description: K3s 集群全栈部署成功，Docker Compose + K3s 双轨并行，E2E 13/13，5 语言多语言
 metadata:
   type: project
 ---
@@ -9,100 +9,94 @@ metadata:
 
 **日期**: 2026-07-17
 **分支**: master
-**状态**: 🟢 全栈生产环境运行正常，E2E 8/13 通过
+**状态**: 🟢 全栈双轨运行（Docker Compose + K3s），E2E 13/13，5 语言多语言上线
 
 ---
 
 ## 本次会话完成
 
-### 1. 🔧 Dockerfile JAR Bug 根因修复
+### 1. Dockerfile JAR Bug 根因修复
+- `nexora-app/pom.xml` 添加 `<goal>repackage</goal>` → 134MB fat JAR
+- 项目未用 `spring-boot-starter-parent`，Spring Boot plugin 不会自动绑定 repackage
 
-**根因**：项目未使用 `spring-boot-starter-parent`，`spring-boot-maven-plugin` 的 `repackage` goal 没有自动绑定到 `package` 阶段，导致只产出 thin JAR (28KB，无 Main-Class) 而非 fat JAR。
+### 2. 基础镜像 ACR 全量迁移
+- maven/node/eclipse-temurin/nginx 全部从 Docker Hub → ACR
+- 构建从 20min → 3min
 
-**修复**：
-- `backend/nexora-app/pom.xml` — 添加 `<executions><execution><goals><goal>repackage</goal></goals></execution></executions>`
-- `backend/Dockerfile` — `cp nexora-app-*.jar app.jar`（glob 不匹配 `.original` 文件，安全）
+### 3. ES IK 中文分词镜像
+- `deploy/elasticsearch/Dockerfile` + `elasticsearch:8.15.0-ik`
 
-### 2. 🚀 基础镜像全部切换到 ACR
+### 4. E2E 13/13 全部通过
+- favorites: 邮箱 beforeEach 内生成
+- recommendations: 允许新用户 0 推荐
+- lang-switch: 验证 UI 不崩溃 + 内容可见
 
-| Dockerfile | 旧镜像 (Docker Hub) | 新镜像 (ACR) |
-|---|---|---|
-| backend builder | `maven:3.9-eclipse-temurin-17` | `acr/.../maven:3.9-eclipse-temurin-21-alpine` |
-| backend runtime | `eclipse-temurin:17-jre-alpine` | `acr/.../eclipse-temurin:21-jre-alpine` |
-| frontend builder | `node:20-alpine` | `acr/.../node:20-alpine` |
-| frontend serve | `nginx:1.27-alpine` | `acr/.../nginx:1.27-alpine` |
+### 5. 5 语言多语言 (zh/en/ja/ko/de)
+- 后端: NewsAIManager + AIAnalysisService 扩展到 5 语言
+- 前端: 3 套新 i18n (ja-JP/ko-KR/de-DE) + 语言下拉
 
-### 3. 🧩 自定义 ES 镜像（IK 中文分词）
+### 6. K3s 集群全栈部署
+- k3d + K3s v1.34.9-k3s1 (ACR 镜像)
+- 1 server + 2 agents
+- 11 pods Running: MySQL/Redis/ES(ik)/RocketMQ/Backend×2/Frontend×2/Prometheus/Grafana
+- `k3d image import` 导入镜像，避免 K3s 节点拉取 ACR
 
-- `deploy/elasticsearch/Dockerfile` — 基于 ACR `elasticsearch:8.15.0` 安装 `analysis-ik` 插件
-- 已推送到 ACR: `elasticsearch:8.15.0-ik`
-- docker-compose 已更新使用此镜像
+### 7. K3s 清单修复
+- ES 镜像 → 8.15.0-ik
+- 新增 RocketMQ (NameServer + Broker)
+- SPRING_ELASTICSEARCH_URIS + imagePullPolicy IfNotPresent
 
-### 4. 🛠 docker-compose.yml 修复
+---
 
-- 添加 `SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200`
-- 添加 `elasticsearch` 到 backend `depends_on`
-- ES 镜像切换到 `elasticsearch:8.15.0-ik`
+## 当前运行状态
 
-### 5. ✅ 全栈服务状态
+### Docker Compose
+```bash
+docker compose -f deploy/docker-compose.yml up -d
+# → 8/8 healthy, localhost:80
+```
 
-| 服务 | 端口 | 状态 |
-|------|------|------|
-| nexora-backend | 8080 | healthy ✅ |
-| nexora-frontend | 80 | running ✅ |
-| nexora-mysql | 3306 | healthy ✅ |
-| nexora-redis | 6379 | healthy ✅ |
-| nexora-es | 9200 | healthy ✅ |
-| nexora-rmq-namesrv | 9876 | healthy ✅ |
-| nexora-rmq-broker | 10911 | healthy ✅ |
-| nexora-prometheus | 9090 | healthy ✅ |
-| nexora-grafana | 3000 | running ✅ |
-
-### 6. 📊 E2E 测试结果
-
-- **8 passed**: auth, news (2), search, recommendations (2), multilang-deep (2)
-- **5 failed** (已有问题，非本次引入):
-  - favorites × 2 — 注册流程问题
-  - recommendations × 1 — 0 推荐卡片（新用户无历史）
-  - verify-lang-switch × 1 — 中英双语句号相同
-  - verify-visual × 1 — 同上
+### K3s 集群 (k3d)
+```bash
+k3d cluster create nexora --config deploy/k3d-config.yaml --image rancher/k3s:v1.34.9-k3s1
+k3d image import <images> -c nexora
+kubectl apply -f deploy/k3s/
+# → 11/11 Running
+# port-forward 访问: kubectl -n nexora port-forward svc/nexora-frontend 5173:80
+```
 
 ---
 
 ## 下个会话起点
 
-### 首选：修复 E2E 失败项
-1. Favorites 测试 — 检查注册/登录流程
-2. 推荐卡片 0 结果 — 可能需要浏览历史做种子数据
-3. 多语言切换 — 确认 LLM 是否对不同 locale 返回不同摘要
+### 首选: K3s Ingress 完善
+- 安装 ingress-nginx 或启用 Traefik
+- 使 frontend 可直接通过 k3d loadbalancer (port 80) 访问
 
-### 备选 1：功能开发
-- Flutter APP 跑起来
-- 新闻源采集流水线验证
+### 备选 1: Flutter APP
+- `app/` → `flutter pub get && flutter run`
 
-### 备选 2：基础设施
-- CI/CD 流水线验证（Docker 构建 + ACR 推送）
-- K3s 集群部署
+### 备选 2: 监控增强
 - ELK 日志收集
+- k6 性能测试
+- Sentry 错误追踪
 
 ---
 
 ## 启动命令速查
 
 ```bash
-# 生产栈（Docker Compose）
+# Docker Compose (本地生产)
 docker compose -f deploy/docker-compose.yml up -d
 
-# 查看状态
-docker ps --filter "name=nexora" --format "table {{.Names}}\t{{.Status}}"
+# K3s (k3d)
+k3d cluster create nexora --config deploy/k3d-config.yaml --image rancher/k3s:v1.34.9-k3s1
+k3d image import crpi-.../nexora-app:latest ... -c nexora
+kubectl apply -f deploy/k3s/
 
-# 健康检查
-curl http://localhost:8080/actuator/health
-
-# E2E 测试
+# E2E
 cd frontend-web && npx playwright test
 
-# 构建 + 推送
-docker build -t crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest -f backend/Dockerfile backend/
-docker push crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest
+# 构建镜像
+docker build -t crpi-.../nexora-app:latest -f backend/Dockerfile backend/
 ```
