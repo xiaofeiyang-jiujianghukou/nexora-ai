@@ -13,8 +13,8 @@ echo "[0/9] Ensuring ingress-nginx is installed..."
 if kubectl get deployment ingress-nginx-controller -n ingress-nginx &>/dev/null; then
   echo "  ingress-nginx already installed, skipping."
 else
-  echo "  Installing ingress-nginx controller..."
-  kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.1/deploy/static/provider/cloud/deploy.yaml
+  echo "  Installing ingress-nginx controller (from ACR)..."
+  kubectl apply -f deploy/k3s/ingress-nginx.yaml
   echo "  Waiting for ingress-nginx to be ready..."
   kubectl wait --namespace ingress-nginx \
     --for=condition=ready pod \

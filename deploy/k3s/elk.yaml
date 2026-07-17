@@ -24,7 +24,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: filebeat
-          image: docker.elastic.co/beats/filebeat:8.15.0
+          image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/filebeat:8.15.0
           args:
             - -e
             - -E
@@ -177,7 +177,7 @@ spec:
     spec:
       containers:
         - name: kibana
-          image: docker.elastic.co/kibana/kibana:8.15.0
+          image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/kibana:8.15.0
           env:
             - name: ELASTICSEARCH_HOSTS
               value: "http://nexora-es:9200"
