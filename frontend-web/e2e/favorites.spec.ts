@@ -2,25 +2,24 @@ import { test, expect } from '@playwright/test';
 
 test.describe('用户收藏流程', () => {
 
-  const testEmail = `e2e_fav_${Date.now()}@nexora.ai`;
   const testPassword = 'fav123456';
 
   test.beforeEach(async ({ page }) => {
+    const testEmail = `e2e_fav_${Date.now()}@nexora.ai`;
+
     // 注册并登录
     await page.goto('/register');
     await page.fill('input[type="email"]', testEmail);
     await page.fill('input[placeholder="昵称"]', '收藏测试');
-    const pwInputs = page.getByPlaceholder('密码');
-    await pwInputs.first().fill(testPassword);
-    await pwInputs.last().fill(testPassword);
+    await page.getByPlaceholder('密码').first().fill(testPassword);
+    await page.getByPlaceholder('再次输入密码').fill(testPassword);
     await page.click('button:has-text("注册")');
 
-    // 如果注册后跳转到登录页，进行登录
-    if (page.url().includes('/login')) {
-      await page.fill('input[type="email"]', testEmail);
-      await page.fill('input[type="password"]', testPassword);
-      await page.click('button:has-text("登录")');
-    }
+    // 注册成功 → 跳转登录页 → 登录
+    await expect(page).toHaveURL('/login', { timeout: 5000 });
+    await page.fill('input[type="email"]', testEmail);
+    await page.fill('input[type="password"]', testPassword);
+    await page.click('button:has-text("登录")');
 
     await expect(page).toHaveURL('/', { timeout: 8000 });
   });
