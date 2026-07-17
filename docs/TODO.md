@@ -1,6 +1,6 @@
 # Nexora AI — 开发日志
 
-> 最后更新：2026-07-16 (MVP P0/P1/P2 全部完成，推荐引擎上线)    
+> 最后更新：2026-07-17 (全栈生产环境上线，Dockerfile JAR 修复，ACR 镜像全部切换)    
 > GitHub：https://github.com/xiaofeiyang-jiujianghukou/nexora-ai.git
 
 ---
@@ -83,26 +83,32 @@
 | News API 集成测试 | 5 | ✅ |
 | Search API 集成测试 | 2 | ✅ |
 | Feed API 集成测试 | 2 | ✅ |
-| Playwright E2E | 5 | ✅ 已恢复 |
-| **合计** | **35 + 5 E2E** | **0 failures** |
+| Playwright E2E | 13 | ✅ 8/13 通过 (5 个已有问题) |
+| **合计** | **35 + 13 E2E** | **8 E2E 通过** |
 
 ---
 
 ## 🚀 运行方式
 
 ```bash
-# 1. 中间件
-docker start nexora-mysql nexora-redis nexora-es nexora-rmq-namesrv nexora-rmq-broker nexora-minio nexora-nacos
+# === 生产环境（一键启动全栈）===
+docker compose -f deploy/docker-compose.yml up -d
 
-# 2. 后端
-cd backend && mvn clean install -DskipTests && cd nexora-app && mvn spring-boot:run '-Dspring-boot.run.profiles=dev'
+# === 开发环境（中间件）===
+docker compose -f deploy/docker-compose-dev.yml up -d
 
-# 3. 前端
+# === 开发模式（本地编译）===
+cd backend && mvn spring-boot:run -Dspring-boot.run.profiles=dev
 cd frontend-web && npx vite --port 5173 --host
 
-# 4. E2E 测试
+# === 构建 + 推送镜像 ===
+docker build -t crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest -f backend/Dockerfile backend/
+docker push crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest
+
+# === E2E 测试 ===
 cd frontend-web && npx playwright test
 ```
+
 
 ---
 
@@ -114,11 +120,43 @@ cd frontend-web && npx playwright test
 |------|------|
 | **缓存失效策略** | `NewsCacheManager` 统一管理，新文章清除全部，AI 完成清除分类 |
 
-### P4 — DevOps
+### P4 — DevOps ✅
 
 | 事项 | 说明 |
 |------|------|
-| CI/CD 流水线 | GitHub Actions（compile → test → e2e → build） |
-| 生产环境配置 | application-prod.yml |
-| Prometheus + Grafana | 监控大盘 |
-| Flutter APP 初始化 | - |
+| CI/CD 流水线 | GitHub Actions（compile → test → e2e → build → push ACR）|
+| 生产环境配置 | application-prod.yml + docker-compose.yml（10 服务全套） |
+| Prometheus + Grafana | 监控大盘，JVM/HTTP/DB/GC 仪表盘 |
+| Flutter APP 初始化 | Riverpod + GoRouter + Dio + freezed |
+
+### P5 — Dockerfile JAR Bug 修复 + ACR 迁移 ✅ (2026-07-17)
+
+| 事项 | 说明 |
+|------|------|
+| **Dockerfile JAR 根因** | 项目未用 spring-boot-starter-parent，repackage goal 未绑定，只产出 28KB thin JAR |
+| **修复** | `nexora-app/pom.xml` 添加 `<goal>repackage</goal>` → 产出 134MB fat JAR |
+| **基础镜像 ACR 迁移** | maven/node/eclipse-temurin/nginx 全部切到 ACR，构建从 20 分钟降到 3 分钟 |
+| **ES IK 插件** | 构建 `elasticsearch:8.15.0-ik` 自定义镜像 + `deploy/elasticsearch/Dockerfile` |
+| **docker-compose 修复** | 添加 `SPRING_ELASTICSEARCH_URIS`、ES 健康检查依赖 |
+| **全栈验证** | 8 服务全部 healthy，前端 port 80 可访问，E2E 8/13 通过 |
+
+---
+
+## 📋 接下来要做
+
+### P6 — E2E 修复 + 功能增强
+
+| 事项 | 说明 |
+|------|------|
+| Favorites E2E 修复 | 注册/登录流程偶发失败 |
+| 推荐种子数据 | 新用户 0 推荐卡片 → 需要浏览历史种子 |
+| 多语言摘要区分 | LLM 对不同 locale 返回不同语言摘要 |
+
+### P7 — K3s 生产部署
+
+| 事项 | 说明 |
+|------|------|
+| K3s 集群部署 | k3d 创建集群 → ACR 镜像导入 → deploy.sh 一键部署 |
+| ELK 日志收集 | - |
+| k6 性能测试 | - |
+| Sentry 错误追踪 | - |

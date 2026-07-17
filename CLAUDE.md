@@ -98,17 +98,40 @@ Commit 规范：`<type>(<scope>): <subject>`（feat/fix/docs/refactor/test/chore
 | 前端架构 + 交互设计 | `docs/designs/Nexora AI 前端架构设计 + WebApp交互设计 v1.0.md` |
 | 开发计划与规范 | `docs/Nexora AI 开发计划与规范 v1.0.md` |
 
-## 快速启动（开发环境）
+## 镜像仓库
+
+所有镜像存储在阿里云 ACR（阿里云容器镜像服务）：
+```
+crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/
+├── nexora-app:latest          # CI 自动构建推送
+├── nexora-frontend:latest     # CI 自动构建推送
+├── mysql:8.0
+├── redis:7-alpine
+├── elasticsearch:8.15.0-ik    # 含 IK 中文分词插件 (deploy/elasticsearch/Dockerfile)
+├── rocketmq:5.2.0
+├── prometheus:v3.3.0
+├── grafana:11.6.0
+├── maven:3.9-eclipse-temurin-21-alpine    # 后端 Dockerfile 构建用
+├── eclipse-temurin:21-jre-alpine          # 后端 Dockerfile 运行时
+├── node:20-alpine                         # 前端 Dockerfile 构建用
+└── nginx:1.27-alpine                      # 前端 Dockerfile 运行时
+```
+
+**注意**：Spring Boot Maven 项目未使用 `spring-boot-starter-parent`，`nexora-app/pom.xml` 必须显式配置 `<goal>repackage</goal>`，否则只产出 thin JAR (28KB 无 Main-Class)。
+
+## 快速启动
 
 ```bash
-# 1. 启动中间件
-cd deploy && docker compose -f docker-compose-dev.yml up -d
+# === 生产环境（一键全栈）===
+docker compose -f deploy/docker-compose.yml up -d
 
-# 2. 启动后端
-cd backend && mvn clean install -DskipTests
-cd nexora-app && mvn spring-boot:run -Dspring-boot.run.profiles=dev
+# === 开发环境（仅中间件 + 本地编译）===
+docker compose -f deploy/docker-compose-dev.yml up -d
+cd backend && mvn spring-boot:run -Dspring-boot.run.profiles=dev
+cd frontend-web && pnpm run dev
 
-# 3. 启动前端
-cd frontend-web && pnpm install && pnpm run dev
+# === 构建 + 推送镜像 ===
+docker build -t crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest -f backend/Dockerfile backend/
+docker push crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest
 ```
 

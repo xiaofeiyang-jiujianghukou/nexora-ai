@@ -40,7 +40,7 @@ services:
 
   # ---- Elasticsearch 8 ----
   elasticsearch:
-    image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/elasticsearch:8.15.0
+    image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/elasticsearch:8.15.0-ik
     container_name: nexora-es
     restart: unless-stopped
     environment:

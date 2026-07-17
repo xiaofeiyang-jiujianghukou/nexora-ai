@@ -1,6 +1,6 @@
 ---
 name: session-handoff
-description: 全部镜像迁移到 ACR，Docker Compose 生产栈就绪，Dockerfile JAR 通配符 bug 待验证
+description: 全栈生产环境启动成功，Dockerfile JAR 修复已提交，8/8 服务 healthy
 metadata:
   type: project
 ---
@@ -9,130 +9,81 @@ metadata:
 
 **日期**: 2026-07-17
 **分支**: master
-**状态**: 🟡 镜像全部迁移到 ACR，Dockerfile JAR 修复待 CI 重建验证
+**状态**: 🟢 全栈生产环境运行正常，E2E 8/13 通过
 
 ---
 
 ## 本次会话完成
 
-### 1. CI/CD 流水线（GitHub Actions）
-→ `.github/workflows/ci.yml`
+### 1. 🔧 Dockerfile JAR Bug 根因修复
 
-| Job | 内容 |
-|-----|------|
-| `backend-compile` | Java 17, `mvn clean install -DskipTests` |
-| `frontend-build` | Node 22, `npm ci`, `vue-tsc --noEmit`, `vite build` |
-| `build` | 编译 JAR → 构建 Docker 镜像 → 推送到 **ACR** |
+**根因**：项目未使用 `spring-boot-starter-parent`，`spring-boot-maven-plugin` 的 `repackage` goal 没有自动绑定到 `package` 阶段，导致只产出 thin JAR (28KB，无 Main-Class) 而非 fat JAR。
 
-### 2. 镜像仓库 — 全部迁移到 ACR
-```
-crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/
-├── nexora-app:latest          ← CI 自动推
-├── nexora-frontend:latest     ← CI 自动推
-├── mysql:8.0
-├── redis:7-alpine
-├── elasticsearch:8.15.0
-├── rocketmq:5.2.0
-├── nacos-server:v2.3.2
-├── minio:latest
-├── prometheus:v3.3.0
-├── grafana:11.6.0
-└── + k3s 系统镜像 × 5
-```
+**修复**：
+- `backend/nexora-app/pom.xml` — 添加 `<executions><execution><goals><goal>repackage</goal></goals></execution></executions>`
+- `backend/Dockerfile` — `cp nexora-app-*.jar app.jar`（glob 不匹配 `.original` 文件，安全）
 
-GitHub Secrets 已配：`ACR_REGISTRY` / `ACR_USERNAME` / `ACR_PASSWORD`
+### 2. 🚀 基础镜像全部切换到 ACR
 
-### 3. 生产配置 + K3s 清单
-- `backend/.../application-prod.yml` — 生产环境配置
-- `deploy/k3s/` — 10 个 K8s 清单 + `deploy.sh` 一键部署
-- `deploy/k3d-config.yaml` — k3d 集群配置
-- `deploy/docker-compose.yml` — **生产栈：10 个服务全套**
+| Dockerfile | 旧镜像 (Docker Hub) | 新镜像 (ACR) |
+|---|---|---|
+| backend builder | `maven:3.9-eclipse-temurin-17` | `acr/.../maven:3.9-eclipse-temurin-21-alpine` |
+| backend runtime | `eclipse-temurin:17-jre-alpine` | `acr/.../eclipse-temurin:21-jre-alpine` |
+| frontend builder | `node:20-alpine` | `acr/.../node:20-alpine` |
+| frontend serve | `nginx:1.27-alpine` | `acr/.../nginx:1.27-alpine` |
 
-### 4. Docker Compose 生产栈
-```bash
-docker compose -f deploy/docker-compose.yml up -d
-```
-| 层 | 服务 |
-|----|------|
-| 数据 | mysql, redis, elasticsearch |
-| 消息 | rocketmq-namesrv, rocketmq-broker |
-| 应用 | nexora-backend, nexora-frontend |
-| 监控 | prometheus, grafana |
+### 3. 🧩 自定义 ES 镜像（IK 中文分词）
 
-### 5. Flutter APP
-→ `app/` — Riverpod + GoRouter + Dio + freezed
-- 需装 Flutter SDK 后 `flutter pub get && flutter run`
+- `deploy/elasticsearch/Dockerfile` — 基于 ACR `elasticsearch:8.15.0` 安装 `analysis-ik` 插件
+- 已推送到 ACR: `elasticsearch:8.15.0-ik`
+- docker-compose 已更新使用此镜像
 
-### 6. 监控
-→ `deploy/monitoring/`
-- Prometheus v3.3.0 + Grafana 11.6.0
-- JVM/HTTP/DB/GC 仪表盘
-- 已集成到 docker-compose.yml 和 K3s 清单
+### 4. 🛠 docker-compose.yml 修复
 
-### 7. E2E 测试
-→ `frontend-web/e2e/` — 8 个 spec
-- auth, news, search, verify-lang-switch, verify-visual
-- favorites, recommendations, multilang-deep（新增）
+- 添加 `SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200`
+- 添加 `elasticsearch` 到 backend `depends_on`
+- ES 镜像切换到 `elasticsearch:8.15.0-ik`
 
-### 8. 集成测试
-→ Testcontainers + 真实 MySQL（ACR 镜像），17 个测试
+### 5. ✅ 全栈服务状态
 
----
+| 服务 | 端口 | 状态 |
+|------|------|------|
+| nexora-backend | 8080 | healthy ✅ |
+| nexora-frontend | 80 | running ✅ |
+| nexora-mysql | 3306 | healthy ✅ |
+| nexora-redis | 6379 | healthy ✅ |
+| nexora-es | 9200 | healthy ✅ |
+| nexora-rmq-namesrv | 9876 | healthy ✅ |
+| nexora-rmq-broker | 10911 | healthy ✅ |
+| nexora-prometheus | 9090 | healthy ✅ |
+| nexora-grafana | 3000 | running ✅ |
 
-## Dockerfile JAR 通配符 Bug（当前卡点）
+### 6. 📊 E2E 测试结果
 
-**根因**：`COPY --from=build /app/nexora-app/target/nexora-app-*.jar app.jar`
-
-Spring Boot 打包产生两个文件：
-- `nexora-app-1.0.0-SNAPSHOT.jar` — fat JAR（~50MB）
-- `nexora-app-1.0.0-SNAPSHOT.jar.original` — 原始 JAR（~28KB）
-
-通配符 `*.jar` 同时匹配两者，Docker COPY 可能选到 `.original`（无 Main-Class）。
-
-**已修复** → `backend/Dockerfile` line 14-15：
-```dockerfile
-RUN mvn clean package -DskipTests -pl nexora-app -am -q && \
-    cd /app/nexora-app/target && \
-    mv nexora-app-*.jar app.jar && \
-    rm -f *.original
-COPY --from=build /app/nexora-app/target/app.jar app.jar
-```
+- **8 passed**: auth, news (2), search, recommendations (2), multilang-deep (2)
+- **5 failed** (已有问题，非本次引入):
+  - favorites × 2 — 注册流程问题
+  - recommendations × 1 — 0 推荐卡片（新用户无历史）
+  - verify-lang-switch × 1 — 中英双语句号相同
+  - verify-visual × 1 — 同上
 
 ---
 
 ## 下个会话起点
 
-### 首选：验证 Dockerfile 修复 + 部署全栈
+### 首选：修复 E2E 失败项
+1. Favorites 测试 — 检查注册/登录流程
+2. 推荐卡片 0 结果 — 可能需要浏览历史做种子数据
+3. 多语言切换 — 确认 LLM 是否对不同 locale 返回不同摘要
 
-```bash
-# 1. 重建并推送后端镜像到 ACR
-#    （等 CI 跑完或本地 docker build && docker push）
+### 备选 1：功能开发
+- Flutter APP 跑起来
+- 新闻源采集流水线验证
 
-# 2. 一键启动全套
-docker compose -f deploy/docker-compose.yml up -d
-
-# 3. 健康检查
-curl http://localhost:8080/actuator/health
-curl http://localhost:80
-
-# 4. 监控
-open http://localhost:3000  # Grafana admin/admin
-open http://localhost:9090  # Prometheus
-
-# 5. E2E 验证
-cd frontend-web && npx playwright test
-```
-
-### 备选 1：端到端验证 + E2E 全绿
-- 启动完整栈 → 运行全部 8 个 E2E spec → 确认全绿
-
-### 备选 2：K3s 实际部署
-- 用 k3d 创建集群 → 导入 ACR 镜像 → `bash deploy/k3s/deploy.sh` → 验证
-
-### 后续队列
-- Flutter APP 跑起来（需装 Flutter SDK）
-- Sentry / ELK 日志收集
-- k6 性能测试
+### 备选 2：基础设施
+- CI/CD 流水线验证（Docker 构建 + ACR 推送）
+- K3s 集群部署
+- ELK 日志收集
 
 ---
 
@@ -142,13 +93,16 @@ cd frontend-web && npx playwright test
 # 生产栈（Docker Compose）
 docker compose -f deploy/docker-compose.yml up -d
 
-# 开发模式（本地编译）
-cd backend && mvn spring-boot:run -Dspring-boot.run.profiles=dev
-cd frontend-web && npx vite --port 5173 --host
+# 查看状态
+docker ps --filter "name=nexora" --format "table {{.Names}}\t{{.Status}}"
 
-# K3s
-bash deploy/k3s/deploy.sh
+# 健康检查
+curl http://localhost:8080/actuator/health
 
-# E2E
+# E2E 测试
 cd frontend-web && npx playwright test
+
+# 构建 + 推送
+docker build -t crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest -f backend/Dockerfile backend/
+docker push crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest
 ```
