@@ -1,33 +1,15 @@
 # ============================================================
-# Nexora AI — 云数据库版 Docker Compose（2C2G 即可跑应用）
+# Nexora AI — 纯应用版（MySQL + Redis 用宿主机已有实例）
 # 用法: docker compose -f deploy/docker-compose-cloud.yml up -d
 #
-# MySQL 使用阿里云 RDS 等云数据库，不本地部署
-# 总内存: ~800MB，2C2G 那台机器也能跑
+# 前提：宿主机已有 MySQL 和 Redis，创建好 nexora 库
+# 总内存: ~650MB，2C2G 足够
 # ============================================================
 version: '3.8'
 
 services:
   # ============================================================
-  # Redis 7 — 128MB
-  # ============================================================
-  redis:
-    image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/redis:7-alpine
-    container_name: nexora-redis
-    restart: unless-stopped
-    command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru --save ""
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ============================================================
-  # Nexora Backend — 384MB（直连云数据库）
+  # Nexora Backend — 384MB
   # ============================================================
   nexora-backend:
     image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest
@@ -40,16 +22,14 @@ services:
       DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_HOST: ${REDIS_HOST:-localhost}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-deepseek-v4-pro}
       ES_ENABLED: "false"
       ROCKETMQ_ENABLED: "false"
       JAVA_OPTS: "-Xms128m -Xmx256m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
-    depends_on:
-      redis:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/actuator/health"]
       interval: 20s
@@ -104,6 +84,5 @@ services:
       - grafana-data:/var/lib/grafana
 
 volumes:
-  redis-data:
   prometheus-data:
   grafana-data:
