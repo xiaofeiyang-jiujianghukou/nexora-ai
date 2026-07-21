@@ -4,9 +4,9 @@
 # ============================================================
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/nexora?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:root}
+    url: ${NEXORA_DB_URL:jdbc:mysql://localhost:3306/nexora?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${NEXORA_DB_USERNAME:root}
+    password: ${NEXORA_DB_PASSWORD:root}
     hikari:
       minimum-idle: 2
       maximum-pool-size: 10
@@ -15,8 +15,9 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      host: ${NEXORA_REDIS_HOST:localhost}
+      port: ${NEXORA_REDIS_PORT:6379}
+      password: ${NEXORA_REDIS_PASSWORD:}
       lettuce:
         pool:
           max-active: 8
@@ -53,9 +54,9 @@ nexora:
     enabled: false
 
 llm:
-  api-key: ${LLM_API_KEY:}
-  base-url: ${LLM_BASE_URL:https://api.deepseek.com}
-  model: ${LLM_MODEL:deepseek-v4-pro}
+  api-key: ${NEXORA_LLM_API_KEY:}
+  base-url: ${NEXORA_LLM_BASE_URL:https://api.deepseek.com}
+  model: ${NEXORA_LLM_MODEL:deepseek-v4-pro}
 
 logging:
   level:
