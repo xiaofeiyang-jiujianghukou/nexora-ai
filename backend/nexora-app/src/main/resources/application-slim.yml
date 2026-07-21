@@ -1,0 +1,63 @@
+# ============================================================
+# Slim Profile — Docker Compose 单机精简部署
+# 无 ES / 无 RocketMQ / 单实例 / 低内存
+# ============================================================
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/nexora?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    hikari:
+      minimum-idle: 2
+      maximum-pool-size: 10
+      idle-timeout: 300000
+      max-lifetime: 1200000
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 4
+          min-idle: 1
+
+  flyway:
+    enabled: true
+
+server:
+  port: 8080
+  compression:
+    enabled: true
+  tomcat:
+    threads:
+      max: 50
+      min-spare: 5
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+rocketmq:
+  name-server: ${ROCKETMQ_NAMESRV:localhost:9876}
+  producer:
+    group: nexora-producer-group
+
+nexora:
+  elasticsearch:
+    enabled: false
+  rocketmq:
+    enabled: false
+
+llm:
+  api-key: ${LLM_API_KEY:}
+  base-url: ${LLM_BASE_URL:https://api.deepseek.com}
+  model: ${LLM_MODEL:deepseek-v4-pro}
+
+logging:
+  level:
+    com.nexora: INFO
+    org.springframework: WARN

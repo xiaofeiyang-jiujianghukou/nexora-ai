@@ -18,6 +18,7 @@ import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +33,6 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-@ConditionalOnProperty(name = "nexora.rocketmq.enabled", havingValue = "true", matchIfMissing = true)
 public class AIAnalysisService {
 
     private final NewsAIManager newsAIManager;
@@ -47,7 +47,7 @@ public class AIAnalysisService {
                              NewsArticleI18nMapper i18nMapper,
                              NewsCategoryMapper categoryMapper,
                              NewsCacheManager newsCacheManager,
-                             RocketMQTemplate rocketMQTemplate) {
+                             @Nullable RocketMQTemplate rocketMQTemplate) {
         this.newsAIManager = newsAIManager;
         this.articleMapper = articleMapper;
         this.i18nMapper = i18nMapper;
@@ -132,15 +132,17 @@ public class AIAnalysisService {
         // 缓存失效：AI 分析完成 → 清除该分类的列表缓存
         newsCacheManager.evictByCategory(article.getCategoryId());
 
-        // 6. 发送 ES 索引任务
-        try {
-            String idJson = String.valueOf(event.getArticleId());
-            byte[] body = idJson.getBytes(StandardCharsets.UTF_8);
-            Message msg = new Message(MQTopics.NEWS_INDEX_TASK, body);
-            DefaultMQProducer producer = rocketMQTemplate.getProducer();
-            producer.send(msg);
-        } catch (Exception e) {
-            log.warn("ES 索引任务发送失败: articleId={}", event.getArticleId(), e);
+        // 6. 发送 ES 索引任务（RocketMQ 可用时）
+        if (rocketMQTemplate != null) {
+            try {
+                String idJson = String.valueOf(event.getArticleId());
+                byte[] body = idJson.getBytes(StandardCharsets.UTF_8);
+                Message msg = new Message(MQTopics.NEWS_INDEX_TASK, body);
+                DefaultMQProducer producer = rocketMQTemplate.getProducer();
+                producer.send(msg);
+            } catch (Exception e) {
+                log.warn("ES 索引任务发送失败: articleId={}", event.getArticleId(), e);
+            }
         }
     }
 
