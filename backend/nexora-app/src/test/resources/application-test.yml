@@ -17,12 +17,18 @@ spring:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
       - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+      - org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration
 
 nexora:
   elasticsearch:
     enabled: false
   redis:
     enabled: false
+  rocketmq:
+    enabled: false
+  crawler:
+    scheduler:
+      enabled: false
 
 rocketmq:
   name-server: localhost:9876

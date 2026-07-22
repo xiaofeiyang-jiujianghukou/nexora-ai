@@ -1,13 +1,25 @@
 # Dependencies
 node_modules/
 .pnpm-store/
+.npm/
+.yarn/cache/
 
 # Build output
 dist/
 target/
+coverage/
 *.class
 *.jar
 *.war
+!.mvn/wrapper/maven-wrapper.jar
+*.hprof
+.attach_pid*
+
+# Frontend / Vite
+.vite/
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
 
 # IDE
 .idea/
@@ -15,21 +27,69 @@ target/
 .vscode/
 *.swp
 *.swo
+.classpath
+.project
+.settings/
 
 # OS
 .DS_Store
+._*
 Thumbs.db
+Desktop.ini
 
-# Env
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
 .env.local
 .env.*.local
+*.p12
+*.pfx
+*.jks
+*.keystore
+key.properties
+local.properties
+**/secret.local.yaml
+**/secrets.local.yaml
 *.log
 
 # Maven
-.mvn/wrapper/maven-wrapper.jar
+dependency-reduced-pom.xml
 
-# Test output
+# Test / coverage output
 test-results/
+playwright-report/
+blob-report/
+frontend-web/e2e/screenshots/
+tests/k6/results/
+lcov.info
 
 # Java
 hs_err_pid*
+
+# Local development tools
+.playwright-mcp/
+/.agents/
+/.codex/
+/.claude/settings.local.json
+/github/
+/-d
+
+# Flutter / Dart generated files
+app/build/
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.packages
+app/.pub-cache/
+app/coverage/
+app/android/.gradle/
+app/android/local.properties
+app/android/key.properties
+app/ios/Pods/
+app/ios/.symlinks/
+app/ios/Flutter/ephemeral/
+app/macos/Flutter/ephemeral/
+app/linux/flutter/ephemeral/
+app/windows/flutter/ephemeral/

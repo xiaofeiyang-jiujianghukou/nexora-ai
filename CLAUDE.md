@@ -97,6 +97,7 @@ Commit 规范：`<type>(<scope>): <subject>`（feat/fix/docs/refactor/test/chore
 | API + 业务流程设计 | `docs/designs/Nexora AI API详细设计 + 核心业务流程设计 v1.0.md` |
 | 前端架构 + 交互设计 | `docs/designs/Nexora AI 前端架构设计 + WebApp交互设计 v1.0.md` |
 | 开发计划与规范 | `docs/Nexora AI 开发计划与规范 v1.0.md` |
+| 千人在线架构、上云成本与商业化分析 | `AnalysisCost.md` |
 
 ## 镜像仓库
 
@@ -154,4 +155,3 @@ cd frontend-web && pnpm run dev
 docker build -t crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest -f backend/Dockerfile backend/
 docker push crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest
 ```
-

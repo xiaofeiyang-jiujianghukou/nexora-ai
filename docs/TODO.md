@@ -1,6 +1,6 @@
 # Nexora AI — 开发日志
 
-> 最后更新：2026-07-22 (Phase 1 MVP 100% — 上云部署进行中，Backend 启动成功，bridge 网络待验证)    
+> 最后更新：2026-07-22 (Phase 1 功能型 MVP 完成；工程验证通过，千人在线生产化方案已完成)
 > GitHub：https://github.com/xiaofeiyang-jiujianghukou/nexora-ai.git
 >
 > **Phase 1 MVP 完成度：100%** | 总测试：48 (35 单元/集成 + 13 E2E) | 0 failures | K3s 全栈验证通过
@@ -126,7 +126,7 @@ cd frontend-web && npx playwright test
 
 | 事项 | 说明 |
 |------|------|
-| CI/CD 流水线 | GitHub Actions（compile → test → e2e → build → push ACR）|
+| CI/CD 流水线 | GitHub Actions 已具备 compile/frontend build/镜像推送；后端测试、E2E、覆盖率与安全扫描门禁待补齐 |
 | 生产环境配置 | application-prod.yml + docker-compose.yml（10 服务全套） |
 | Prometheus + Grafana | 监控大盘，JVM/HTTP/DB/GC 仪表盘 |
 | Flutter APP 初始化 | Riverpod + GoRouter + Dio + freezed |
@@ -181,7 +181,7 @@ cd frontend-web && npx playwright test
 | Flutter APP ✅ | Flutter 3.44.6 + Dart 3.12.2，pub get + build_runner + analyze 全部通过 |
 | Sentry 错误追踪 ✅ | 三端全栈集成：Spring Boot + Vue + Flutter，DSN 环境变量注入 |
 | ELK 日志收集 ✅ | JSON 日志 + Filebeat DaemonSet + Kibana，全栈日志可观测 |
-| k6 性能测试 ✅ | smoke + load/stress/soak 脚本，6 端点覆盖，p95 阈值，k6 v0.54.0 |
+| k6 压测脚本 ✅ | smoke + 分阶段负载脚本，6 端点覆盖，p95 阈值；1000 CCU/200 RPS 生产容量报告待执行 |
 | LLM 多语言摘要质量 ✅ | System prompt 强化 + prompt 模板加翻译验证步骤，ja/ko/de 不再回退 English |
 
 ---
@@ -197,3 +197,25 @@ cd frontend-web && npx playwright test
 | **AI 文章覆盖率** | 319 篇中 22 篇缺 AI 分析（93.1%），已触发 MQ 异步回填 |
 | **Filebeat 配置** | 当前 YAML 较基础，后续可加多行日志合并、日志级别过滤等 |
 | **Sentry DSN** | 需要填入真实 Sentry DSN 才能激活错误追踪 |
+
+---
+
+## ✅ P11 — 工程验证、仓库清理与市场方案 (2026-07-22)
+
+| 事项 | 结果 |
+|------|------|
+| **后端完整测试** | 修复 Testcontainers ACR MySQL 镜像兼容声明与 test profile 外部服务隔离；`mvn test` 35/35 通过，0 failures / 0 errors / 0 skipped |
+| **后端生产打包** | `mvn package -Dmaven.test.skip=true` 成功，10/10 Maven 模块构建成功 |
+| **前端依赖与构建** | 补齐 `@sentry/vue` 锁文件；`npm ci` 可复现安装，`npm run build` 成功（1981 modules） |
+| **仓库清理** | 完善 Node/Maven/Flutter/Playwright/IDE/Secret 忽略规则；E2E 运行时截图停止跟踪但保留本地生成 |
+| **MCP 配置迁移** | Playwright MCP 配置从 `.claude/.mcp.json` 迁移到根目录 `.mcp.json`，项目级 Claude 配置独立保存 |
+| **架构与商业方案** | 新增根目录 `AnalysisCost.md`：现状审计、1000 CCU 容量模型、阿里云架构与成本、推广、会员和半年升级路线 |
+
+### 下一阶段最高优先级
+
+1. 关闭公开管理端点、轮换 JWT 密钥并补齐登录/接口限流。
+2. 生产数据层迁移到 RDS/Redis 托管服务，停止使用 K3s `emptyDir` 承载 MySQL/ES。
+3. 拆分 API/Worker 运行角色，消除 AI 长事务，补齐 MQ 重试、DLQ 与幂等。
+4. 消除新闻列表/推荐 N+1，修复并量化 Redis 缓存命中率。
+5. 将后端测试、Playwright、覆盖率和安全扫描真正加入 CI 门禁。
+6. 按 `AnalysisCost.md` 执行 200 RPS、400 RPS burst 与 1000 VU 验收。
