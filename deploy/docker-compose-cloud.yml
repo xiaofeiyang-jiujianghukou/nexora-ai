@@ -15,6 +15,8 @@ services:
     image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest
     container_name: nexora-backend
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "8080:8080"
     environment:

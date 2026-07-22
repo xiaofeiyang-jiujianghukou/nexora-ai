@@ -4,7 +4,7 @@
 # ============================================================
 spring:
   datasource:
-    url: ${NEXORA_DB_URL:jdbc:mysql://localhost:3306/nexora?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    url: ${NEXORA_DB_URL:jdbc:mysql://host.docker.internal:3306/nexora?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
     username: ${NEXORA_DB_USERNAME:root}
     password: ${NEXORA_DB_PASSWORD:root}
     hikari:
@@ -15,7 +15,7 @@ spring:
 
   data:
     redis:
-      host: ${NEXORA_REDIS_HOST:localhost}
+      host: ${NEXORA_REDIS_HOST:host.docker.internal}
       port: ${NEXORA_REDIS_PORT:6379}
       password: ${NEXORA_REDIS_PASSWORD:}
       lettuce:
