@@ -15,10 +15,8 @@ services:
     image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-app:latest
     container_name: nexora-backend
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    ports:
-      - "8080:8080"
+    network_mode: host
+    # host 模式下直接使用宿主机网络栈
     environment:
       SPRING_PROFILES_ACTIVE: slim
       NEXORA_DB_URL: ${NEXORA_DB_URL}
@@ -46,11 +44,7 @@ services:
     image: crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang930112/nexora-frontend:latest
     container_name: nexora-frontend
     restart: unless-stopped
-    ports:
-      - "80:80"
-    depends_on:
-      nexora-backend:
-        condition: service_healthy
+    network_mode: host
 
   # ============================================================
   # Prometheus — 128MB
