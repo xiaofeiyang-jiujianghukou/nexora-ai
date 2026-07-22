@@ -37,6 +37,9 @@ server:
       min-spare: 5
 
 management:
+  health:
+    elasticsearch:
+      enabled: false
   endpoints:
     web:
       exposure:
