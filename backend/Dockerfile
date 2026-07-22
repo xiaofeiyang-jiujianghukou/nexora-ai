@@ -3,7 +3,7 @@ FROM crpi-27zlqugq2208c0pz.cn-hangzhou.personal.cr.aliyuncs.com/xiaofeiyang93011
 WORKDIR /app
 
 # 配置阿里云 Maven 镜像 + 依赖缓存层
-RUN echo '<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0">\
+RUN mkdir -p /root/.m2 && echo '<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0">\
   <mirrors>\
     <mirror>\
       <id>aliyun</id>\
